@@ -19,3 +19,11 @@ src/mcp-server
 opencode.json
 
 gen_token.py
+
+AUTHENTICATION.md
+
+test/test_token.go
+
+TEST.md
+
+test_endpoints.sh

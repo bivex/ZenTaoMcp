@@ -14,16 +14,26 @@ package client
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
+	"sync"
+	"time"
 )
 
 type ZenTaoClient struct {
-	BaseURL string
-	Token   string
-	Client  *http.Client
+	BaseURL   string
+	Code      string
+	Key       string
+	Token     string
+	Client    *http.Client
+	lastTime  int64
+	timeMutex sync.Mutex
 }
 
 func NewZenTaoClient(baseURL string) *ZenTaoClient {
@@ -31,6 +41,20 @@ func NewZenTaoClient(baseURL string) *ZenTaoClient {
 		BaseURL: baseURL,
 		Client:  &http.Client{},
 	}
+}
+
+func NewZenTaoClientWithApp(baseURL, code, key string) *ZenTaoClient {
+	return &ZenTaoClient{
+		BaseURL: baseURL,
+		Code:    code,
+		Key:     key,
+		Client:  &http.Client{},
+	}
+}
+
+func (c *ZenTaoClient) SetAppCredentials(code, key string) {
+	c.Code = code
+	c.Key = key
 }
 
 func (c *ZenTaoClient) GetToken(account, password string) (string, error) {
@@ -77,6 +101,50 @@ func (c *ZenTaoClient) GetToken(account, password string) (string, error) {
 	return "", fmt.Errorf("token not found in response")
 }
 
+func (c *ZenTaoClient) generateToken(timestamp int64) string {
+	tokenString := c.Code + c.Key + strconv.FormatInt(timestamp, 10)
+	hash := md5.Sum([]byte(tokenString))
+	return hex.EncodeToString(hash[:])
+}
+
+func (c *ZenTaoClient) getTimestamp() int64 {
+	c.timeMutex.Lock()
+	defer c.timeMutex.Unlock()
+
+	now := time.Now().Unix()
+	if now <= c.lastTime {
+		now = c.lastTime + 1
+	}
+	c.lastTime = now
+	return now
+}
+
+func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
+	baseURL := fmt.Sprintf("%s%s", c.BaseURL, path)
+
+	if c.Code != "" && c.Key != "" {
+		timestamp := c.getTimestamp()
+		token := c.generateToken(timestamp)
+
+		if params == nil {
+			params = make(map[string]string)
+		}
+		params["code"] = c.Code
+		params["time"] = strconv.FormatInt(timestamp, 10)
+		params["token"] = token
+	}
+
+	if len(params) > 0 {
+		queryValues := url.Values{}
+		for k, v := range params {
+			queryValues.Set(k, v)
+		}
+		return fmt.Sprintf("%s?%s", baseURL, queryValues.Encode())
+	}
+
+	return baseURL
+}
+
 func (c *ZenTaoClient) DoRequest(method, path string, body interface{}, headers map[string]string) ([]byte, error) {
 	var reqBody io.Reader
 	if body != nil {
@@ -87,15 +155,14 @@ func (c *ZenTaoClient) DoRequest(method, path string, body interface{}, headers 
 		reqBody = bytes.NewBuffer(jsonData)
 	}
 
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s", c.BaseURL, path), reqBody)
+	requestURL := c.buildURL(path, nil)
+
+	req, err := http.NewRequest(method, requestURL, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	if c.Token != "" {
-		req.Header.Set("Token", c.Token)
-	}
 
 	for key, value := range headers {
 		req.Header.Set(key, value)

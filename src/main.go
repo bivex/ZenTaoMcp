@@ -10,7 +10,6 @@
 // Licensed under the MIT License.
 // Commercial licensing available upon request.
 
-
 package main
 
 import (
@@ -33,7 +32,14 @@ func main() {
 		baseURL = "http://localhost:8080"
 	}
 
-	ztClient = client.NewZenTaoClient(baseURL)
+	code := os.Getenv("ZENTAO_APP_CODE")
+	key := os.Getenv("ZENTAO_APP_KEY")
+
+	if code != "" && key != "" {
+		ztClient = client.NewZenTaoClientWithApp(baseURL, code, key)
+	} else {
+		ztClient = client.NewZenTaoClient(baseURL)
+	}
 
 	s := server.NewMCPServer(
 		"ZenTao MCP Server",

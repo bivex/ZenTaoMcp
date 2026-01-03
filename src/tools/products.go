@@ -21,33 +21,6 @@ import (
 	"github.com/zentao/mcp-server/client"
 )
 
-func RegisterAuthTools(s *server.MCPServer, client *client.ZenTaoClient) {
-	loginTool := mcp.NewTool("zentao_login",
-		mcp.WithDescription("Login to ZenTao and get authentication token"),
-		mcp.WithString("account",
-			mcp.Required(),
-			mcp.Description("ZenTao account username"),
-		),
-		mcp.WithString("password",
-			mcp.Required(),
-			mcp.Description("ZenTao account password"),
-		),
-	)
-
-	s.AddTool(loginTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		args := request.GetArguments()
-		account := args["account"].(string)
-		password := args["password"].(string)
-
-		token, err := client.GetToken(account, password)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Login failed: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(fmt.Sprintf("Successfully logged in. Token: %s", token)), nil
-	})
-}
-
 func RegisterProductTools(s *server.MCPServer, client *client.ZenTaoClient) {
 	createProductTool := mcp.NewTool("create_product",
 		mcp.WithDescription("Create a new product in ZenTao"),
