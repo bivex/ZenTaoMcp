@@ -237,8 +237,11 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering datatable and report tools", nil)
 	tools.RegisterDatatableTools(s, ztClient)
 
+	logger.Debug("server", "Registering admin tools", nil)
+	tools.RegisterAdminTools(s, ztClient)
+
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 435,
+		"total_tools": 505,
 	})
 }
 
