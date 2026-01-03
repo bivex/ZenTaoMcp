@@ -29,3 +29,5 @@ TEST.md
 test_endpoints.sh
 
 zentao-mcp
+
+test_failures.sh

@@ -1,5 +1,121 @@
 # ZenTao MCP Server
 
+## 🔍 Comprehensive Debug Logging
+
+The ZenTao MCP Server includes extensive debug logging capabilities for monitoring, troubleshooting, and development.
+
+### Environment Variables
+
+Configure logging behavior using these environment variables:
+
+| Variable | Description | Default | Values |
+|----------|-------------|---------|--------|
+| `ZENTAO_LOG_LEVEL` | Logging verbosity level | `INFO` | `DEBUG`, `INFO`, `WARN`, `ERROR` |
+| `ZENTAO_LOG_JSON` | Enable JSON structured logging | `false` | `true`, `false` |
+
+### Log Levels
+
+- **DEBUG**: Detailed diagnostic information for development
+- **INFO**: General information about server operations
+- **WARN**: Warning messages for potential issues
+- **ERROR**: Error conditions that don't stop the server
+
+### Log Components
+
+The logging system categorizes messages by component:
+
+- **server**: Main server initialization and lifecycle
+- **client**: HTTP client operations and API calls
+- **tools**: MCP tool registration and execution
+- **resources**: MCP resource registration and access
+- **prompt**: MCP prompt handling
+- **api**: ZenTao API interactions
+- **mcp**: MCP protocol operations
+- **auth**: Authentication operations
+
+### Human-Readable Format (Default)
+
+```
+[INFO] server/Info: ZenTao MCP Server starting up [version=1.0.0]
+[DEBUG] client/Debug: Built request URL [base_url=https://zen.w-w.top/api.php, path=?m=product&f=browse, auth_added=true, param_count=3]
+[WARN] server/Warn: ZENTAO_BASE_URL not set, using default [default_url=http://localhost:8080]
+```
+
+### JSON Structured Format
+
+Set `ZENTAO_LOG_JSON=true` for machine-readable logs:
+
+```json
+{
+  "timestamp": "2026-01-03T08:28:17Z",
+  "level": "INFO",
+  "component": "server",
+  "function": "Info",
+  "message": "ZenTao MCP Server starting up",
+  "fields": {
+    "version": "1.0.0"
+  }
+}
+```
+
+### Logged Operations
+
+The logging system captures:
+
+#### Server Lifecycle
+- Configuration loading and validation
+- MCP server initialization
+- Tool and resource registration
+- Startup/shutdown events
+
+#### HTTP Operations
+- Request URL construction
+- Authentication token generation
+- Request/response logging with timing
+- Error handling and retries
+
+#### MCP Operations
+- Tool calls with parameters
+- Resource reads with URIs
+- Prompt generation
+- Protocol message handling
+
+#### API Interactions
+- ZenTao API request/response cycles
+- Authentication flows
+- Data transformation and parsing
+
+### Usage Examples
+
+#### Enable Debug Logging
+```bash
+export ZENTAO_LOG_LEVEL=DEBUG
+./mcp-server
+```
+
+#### Enable JSON Logging for Log Aggregation
+```bash
+export ZENTAO_LOG_LEVEL=INFO
+export ZENTAO_LOG_JSON=true
+./mcp-server
+```
+
+#### Monitor API Calls
+```bash
+export ZENTAO_LOG_LEVEL=DEBUG
+export ZENTAO_LOG_JSON=false
+./mcp-server 2>&1 | grep "client\|api"
+```
+
+### Performance Considerations
+
+- **DEBUG level** generates significant log volume - use only for troubleshooting
+- **JSON format** is recommended for production log aggregation systems
+- **INFO level** provides good balance of information and performance
+- Logs are written to stderr to avoid interfering with MCP protocol on stdout
+
+# ZenTao MCP Server
+
 A Model Context Protocol (MCP) server for ZenTao, enabling seamless integration between LLM applications and ZenTao project management system.
 
 ## Features
