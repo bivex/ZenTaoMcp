@@ -216,8 +216,11 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering AI tools", nil)
 	tools.RegisterAiTools(s, ztClient)
 
+	logger.Debug("server", "Registering zanode tools", nil)
+	tools.RegisterZanodeTools(s, ztClient)
+
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 277,
+		"total_tools": 304,
 	})
 }
 
@@ -300,9 +303,12 @@ func registerResources(s *server.MCPServer) {
 	logger.Debug("server", "Registering AI resources", nil)
 	resources.RegisterAiResources(s, ztClient)
 
+	logger.Debug("server", "Registering zanode resources", nil)
+	resources.RegisterZanodeResources(s, ztClient)
+
 	logger.Info("server", "All resource registrations completed", map[string]interface{}{
-		"total_resources": 40,
-		"templates_registered": 88,
+		"total_resources": 42,
+		"templates_registered": 96,
 		"note": "List resources + resource templates for individual/scoped access",
 	})
 }
