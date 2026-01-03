@@ -165,8 +165,65 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering release tools", nil)
 	tools.RegisterReleaseTools(s, ztClient)
 
+	logger.Debug("server", "Registering API library tools", nil)
+	tools.RegisterApiLibTools(s, ztClient)
+
+	logger.Debug("server", "Registering entry tools", nil)
+	tools.RegisterEntryTools(s, ztClient)
+
+	logger.Debug("server", "Registering my module tools", nil)
+	tools.RegisterMyTools(s, ztClient)
+
+	logger.Debug("server", "Registering todo tools", nil)
+	tools.RegisterTodoTools(s, ztClient)
+
+	logger.Debug("server", "Registering personnel tools", nil)
+	tools.RegisterPersonnelTools(s, ztClient)
+
+	logger.Debug("server", "Registering program tools", nil)
+	tools.RegisterProgramTools(s, ztClient)
+
+	logger.Debug("server", "Registering stakeholder tools", nil)
+	tools.RegisterStakeholderTools(s, ztClient)
+
+	logger.Debug("server", "Registering branch tools", nil)
+	tools.RegisterBranchTools(s, ztClient)
+
+	logger.Debug("server", "Registering design tools", nil)
+	tools.RegisterDesignTools(s, ztClient)
+
+	logger.Debug("server", "Registering projectbuild tools", nil)
+	tools.RegisterProjectBuildTools(s, ztClient)
+
+	logger.Debug("server", "Registering build tools", nil)
+	tools.RegisterBuildTools(s, ztClient)
+
+	logger.Debug("server", "Registering execution tools", nil)
+	tools.RegisterExecutionTools(s, ztClient)
+
+	logger.Debug("server", "Registering kanban tools", nil)
+	tools.RegisterKanbanTools(s, ztClient)
+
+	logger.Debug("server", "Registering epic tools", nil)
+	tools.RegisterEpicTools(s, ztClient)
+
+	logger.Debug("server", "Registering requirement tools", nil)
+	tools.RegisterRequirementTools(s, ztClient)
+
+	logger.Debug("server", "Registering space tools", nil)
+	tools.RegisterSpaceTools(s, ztClient)
+
+	logger.Debug("server", "Registering transfer tools", nil)
+	tools.RegisterTransferTools(s, ztClient)
+
+	logger.Debug("server", "Registering ZAI tools", nil)
+	tools.RegisterZaiTools(s, ztClient)
+
+	logger.Debug("server", "Registering AI tools", nil)
+	tools.RegisterAiTools(s, ztClient)
+
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 16,
+		"total_tools": 279,
 	})
 }
 
@@ -210,9 +267,57 @@ func registerResources(s *server.MCPServer) {
 	logger.Debug("server", "Registering release resources", nil)
 	resources.RegisterReleaseResources(s, ztClient)
 
+	logger.Debug("server", "Registering API library resources", nil)
+	resources.RegisterApiLibResources(s, ztClient)
+
+	logger.Debug("server", "Registering entry resources", nil)
+	resources.RegisterEntryResources(s, ztClient)
+
+	logger.Debug("server", "Registering my module resources", nil)
+	resources.RegisterMyResources(s, ztClient)
+
+	logger.Debug("server", "Registering todo resources", nil)
+	resources.RegisterTodoResources(s, ztClient)
+
+	logger.Debug("server", "Registering personnel resources", nil)
+	resources.RegisterPersonnelResources(s, ztClient)
+
+	logger.Debug("server", "Registering program resources", nil)
+	resources.RegisterProgramResources(s, ztClient)
+
+	logger.Debug("server", "Registering stakeholder resources", nil)
+	resources.RegisterStakeholderResources(s, ztClient)
+
+	logger.Debug("server", "Registering build resources", nil)
+	resources.RegisterBuildResources(s, ztClient)
+
+	logger.Debug("server", "Registering execution resources", nil)
+	resources.RegisterExecutionResources(s, ztClient)
+
+	logger.Debug("server", "Registering kanban resources", nil)
+	resources.RegisterKanbanResources(s, ztClient)
+
+	logger.Debug("server", "Registering epic resources", nil)
+	resources.RegisterEpicResources(s, ztClient)
+
+	logger.Debug("server", "Registering requirement resources", nil)
+	resources.RegisterRequirementResources(s, ztClient)
+
+	logger.Debug("server", "Registering space resources", nil)
+	resources.RegisterSpaceResources(s, ztClient)
+
+	logger.Debug("server", "Registering transfer resources", nil)
+	resources.RegisterTransferResources(s, ztClient)
+
+	logger.Debug("server", "Registering ZAI resources", nil)
+	resources.RegisterZaiResources(s, ztClient)
+
+	logger.Debug("server", "Registering AI resources", nil)
+	resources.RegisterAiResources(s, ztClient)
+
 	logger.Info("server", "All resource registrations completed", map[string]interface{}{
-		"total_resources": 10,
-		"templates_registered": 21,
+		"total_resources": 44,
+		"templates_registered": 88,
 		"note": "List resources + resource templates for individual/scoped access",
 	})
 }

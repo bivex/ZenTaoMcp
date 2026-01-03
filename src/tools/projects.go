@@ -209,6 +209,551 @@ func RegisterProjectTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		return mcp.NewToolResultText(string(resp)), nil
 	})
 
+	// Enhanced project management tools
+	getProjectIndexTool := mcp.NewTool("get_project_index",
+		mcp.WithDescription("Get project index/dashboard"),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithString("browseType",
+			mcp.Description("Browse type"),
+		),
+		mcp.WithNumber("recTotal",
+			mcp.Description("Total records"),
+		),
+		mcp.WithNumber("recPerPage",
+			mcp.Description("Records per page"),
+		),
+		mcp.WithNumber("pageID",
+			mcp.Description("Page ID"),
+		),
+	)
+
+	s.AddTool(getProjectIndexTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("projectID=%d", int(args["projectID"].(float64)))
+		if v, ok := args["browseType"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&browseType=%s", v)
+		}
+		if v, ok := args["recTotal"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recTotal=%d", int(v.(float64)))
+		}
+		if v, ok := args["recPerPage"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recPerPage=%d", int(v.(float64)))
+		}
+		if v, ok := args["pageID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&pageID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=index&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project index: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	browseProjectsTool := mcp.NewTool("browse_projects",
+		mcp.WithDescription("Browse projects by program"),
+		mcp.WithNumber("programID",
+			mcp.Required(),
+			mcp.Description("Program ID"),
+		),
+		mcp.WithString("browseType",
+			mcp.Description("Browse type"),
+		),
+		mcp.WithNumber("param",
+			mcp.Description("Parameter value"),
+		),
+		mcp.WithString("orderBy",
+			mcp.Description("Order by field"),
+		),
+		mcp.WithNumber("recTotal",
+			mcp.Description("Total records"),
+		),
+		mcp.WithNumber("recPerPage",
+			mcp.Description("Records per page"),
+		),
+		mcp.WithNumber("pageID",
+			mcp.Description("Page ID"),
+		),
+	)
+
+	s.AddTool(browseProjectsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("programID=%d", int(args["programID"].(float64)))
+		if v, ok := args["browseType"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&browseType=%s", v)
+		}
+		if v, ok := args["param"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&param=%d", int(v.(float64)))
+		}
+		if v, ok := args["orderBy"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&orderBy=%s", v)
+		}
+		if v, ok := args["recTotal"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recTotal=%d", int(v.(float64)))
+		}
+		if v, ok := args["recPerPage"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recPerPage=%d", int(v.(float64)))
+		}
+		if v, ok := args["pageID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&pageID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=browse&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to browse projects: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	getProjectKanbanTool := mcp.NewTool("get_project_kanban",
+		mcp.WithDescription("Get project kanban view"),
+	)
+
+	s.AddTool(getProjectKanbanTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		resp, err := client.Get("/index.php?m=project&f=kanban&t=json")
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project kanban: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	createProjectGuideTool := mcp.NewTool("create_project_guide",
+		mcp.WithDescription("Create project guide"),
+		mcp.WithNumber("programID",
+			mcp.Required(),
+			mcp.Description("Program ID"),
+		),
+		mcp.WithString("from",
+			mcp.Description("Source"),
+		),
+		mcp.WithNumber("productID",
+			mcp.Description("Product ID"),
+		),
+		mcp.WithNumber("branchID",
+			mcp.Description("Branch ID"),
+		),
+	)
+
+	s.AddTool(createProjectGuideTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("programID=%d", int(args["programID"].(float64)))
+		if v, ok := args["from"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&from=%s", v)
+		}
+		if v, ok := args["productID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&productID=%d", int(v.(float64)))
+		}
+		if v, ok := args["branchID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&branchID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=createGuide&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to create project guide: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	exportProjectsTool := mcp.NewTool("export_projects",
+		mcp.WithDescription("Export projects"),
+		mcp.WithString("status",
+			mcp.Description("Project status filter"),
+		),
+		mcp.WithString("orderBy",
+			mcp.Description("Order by field"),
+		),
+	)
+
+	s.AddTool(exportProjectsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := ""
+		if v, ok := args["status"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&status=%s", v)
+		}
+		if v, ok := args["orderBy"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&orderBy=%s", v)
+		}
+
+		resp, err := client.Post(fmt.Sprintf("/index.php?m=project&f=export&t=json%s", queryParams), nil)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to export projects: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	getProjectTeamTool := mcp.NewTool("get_project_team",
+		mcp.WithDescription("Get project team members"),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+	)
+
+	s.AddTool(getProjectTeamTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		projectID := int(args["projectID"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=team&t=json&projectID=%d", projectID))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project team: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	manageProjectMembersTool := mcp.NewTool("manage_project_members",
+		mcp.WithDescription("Manage project members"),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithString("dept",
+			mcp.Description("Department"),
+		),
+		mcp.WithNumber("copyProjectID",
+			mcp.Description("Copy members from project ID"),
+		),
+		mcp.WithArray("members",
+			mcp.Description("Members to add"),
+		),
+	)
+
+	s.AddTool(manageProjectMembersTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		body := map[string]interface{}{}
+
+		if v, ok := args["members"]; ok && v != nil {
+			body["members"] = v
+		}
+
+		queryParams := fmt.Sprintf("&projectID=%d", int(args["projectID"].(float64)))
+		if v, ok := args["dept"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&dept=%s", v)
+		}
+		if v, ok := args["copyProjectID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&copyProjectID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Post(fmt.Sprintf("/index.php?m=project&f=manageMembers&t=json%s", queryParams), body)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to manage project members: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	unlinkProjectMemberTool := mcp.NewTool("unlink_project_member",
+		mcp.WithDescription("Remove a member from project"),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithNumber("userID",
+			mcp.Required(),
+			mcp.Description("User ID to remove"),
+		),
+		mcp.WithString("removeExecution",
+			mcp.Description("Also remove from executions"),
+			mcp.Enum("yes", "no"),
+		),
+	)
+
+	s.AddTool(unlinkProjectMemberTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("projectID=%d&userID=%d", int(args["projectID"].(float64)), int(args["userID"].(float64)))
+		if v, ok := args["removeExecution"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&removeExecution=%s", v)
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=unlinkMember&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to unlink project member: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	getProjectExecutionsTool := mcp.NewTool("get_project_executions",
+		mcp.WithDescription("Get executions for a project"),
+		mcp.WithString("status",
+			mcp.Description("Execution status"),
+		),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithString("orderBy",
+			mcp.Description("Order by field"),
+		),
+		mcp.WithNumber("productID",
+			mcp.Description("Product ID"),
+		),
+		mcp.WithNumber("recTotal",
+			mcp.Description("Total records"),
+		),
+		mcp.WithNumber("recPerPage",
+			mcp.Description("Records per page"),
+		),
+		mcp.WithNumber("pageID",
+			mcp.Description("Page ID"),
+		),
+		mcp.WithNumber("queryID",
+			mcp.Description("Query ID"),
+		),
+	)
+
+	s.AddTool(getProjectExecutionsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("projectID=%d", int(args["projectID"].(float64)))
+		if v, ok := args["status"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&status=%s", v)
+		}
+		if v, ok := args["orderBy"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&orderBy=%s", v)
+		}
+		if v, ok := args["productID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&productID=%d", int(v.(float64)))
+		}
+		if v, ok := args["recTotal"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recTotal=%d", int(v.(float64)))
+		}
+		if v, ok := args["recPerPage"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recPerPage=%d", int(v.(float64)))
+		}
+		if v, ok := args["pageID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&pageID=%d", int(v.(float64)))
+		}
+		if v, ok := args["queryID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&queryID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=execution&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project executions: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	getProjectBugsTool := mcp.NewTool("get_project_bugs",
+		mcp.WithDescription("Get bugs for a project"),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithNumber("productID",
+			mcp.Required(),
+			mcp.Description("Product ID"),
+		),
+		mcp.WithString("branchID",
+			mcp.Description("Branch ID"),
+		),
+		mcp.WithString("orderBy",
+			mcp.Description("Order by field"),
+		),
+		mcp.WithNumber("build",
+			mcp.Description("Build ID"),
+		),
+		mcp.WithString("type",
+			mcp.Description("Bug type"),
+		),
+		mcp.WithNumber("param",
+			mcp.Description("Parameter value"),
+		),
+		mcp.WithNumber("recTotal",
+			mcp.Description("Total records"),
+		),
+		mcp.WithNumber("recPerPage",
+			mcp.Description("Records per page"),
+		),
+		mcp.WithNumber("pageID",
+			mcp.Description("Page ID"),
+		),
+	)
+
+	s.AddTool(getProjectBugsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("projectID=%d&productID=%d", int(args["projectID"].(float64)), int(args["productID"].(float64)))
+		if v, ok := args["branchID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&branchID=%s", v)
+		}
+		if v, ok := args["orderBy"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&orderBy=%s", v)
+		}
+		if v, ok := args["build"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&build=%d", int(v.(float64)))
+		}
+		if v, ok := args["type"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&type=%s", v)
+		}
+		if v, ok := args["param"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&param=%d", int(v.(float64)))
+		}
+		if v, ok := args["recTotal"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recTotal=%d", int(v.(float64)))
+		}
+		if v, ok := args["recPerPage"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recPerPage=%d", int(v.(float64)))
+		}
+		if v, ok := args["pageID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&pageID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=bug&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project bugs: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	getProjectTestCasesTool := mcp.NewTool("get_project_testcases",
+		mcp.WithDescription("Get test cases for a project"),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithNumber("productID",
+			mcp.Required(),
+			mcp.Description("Product ID"),
+		),
+		mcp.WithString("branch",
+			mcp.Description("Branch"),
+		),
+		mcp.WithString("browseType",
+			mcp.Description("Browse type"),
+		),
+		mcp.WithNumber("param",
+			mcp.Description("Parameter value"),
+		),
+		mcp.WithString("caseType",
+			mcp.Description("Case type"),
+		),
+		mcp.WithString("orderBy",
+			mcp.Description("Order by field"),
+		),
+		mcp.WithNumber("recTotal",
+			mcp.Description("Total records"),
+		),
+		mcp.WithNumber("recPerPage",
+			mcp.Description("Records per page"),
+		),
+		mcp.WithNumber("pageID",
+			mcp.Description("Page ID"),
+		),
+	)
+
+	s.AddTool(getProjectTestCasesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("projectID=%d&productID=%d", int(args["projectID"].(float64)), int(args["productID"].(float64)))
+		if v, ok := args["branch"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&branch=%s", v)
+		}
+		if v, ok := args["browseType"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&browseType=%s", v)
+		}
+		if v, ok := args["param"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&param=%d", int(v.(float64)))
+		}
+		if v, ok := args["caseType"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&caseType=%s", v)
+		}
+		if v, ok := args["orderBy"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&orderBy=%s", v)
+		}
+		if v, ok := args["recTotal"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recTotal=%d", int(v.(float64)))
+		}
+		if v, ok := args["recPerPage"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recPerPage=%d", int(v.(float64)))
+		}
+		if v, ok := args["pageID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&pageID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=testcase&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project test cases: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	getProjectBuildsTool := mcp.NewTool("get_project_builds",
+		mcp.WithDescription("Get builds for a project"),
+		mcp.WithNumber("projectID",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithString("type",
+			mcp.Description("Build type"),
+			mcp.Enum("all", "product", "bysearch"),
+		),
+		mcp.WithNumber("param",
+			mcp.Description("Parameter value"),
+		),
+		mcp.WithString("orderBy",
+			mcp.Description("Order by field"),
+		),
+		mcp.WithNumber("recTotal",
+			mcp.Description("Total records"),
+		),
+		mcp.WithNumber("recPerPage",
+			mcp.Description("Records per page"),
+		),
+		mcp.WithNumber("pageID",
+			mcp.Description("Page ID"),
+		),
+	)
+
+	s.AddTool(getProjectBuildsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		queryParams := fmt.Sprintf("projectID=%d", int(args["projectID"].(float64)))
+		if v, ok := args["type"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&type=%s", v)
+		}
+		if v, ok := args["param"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&param=%d", int(v.(float64)))
+		}
+		if v, ok := args["orderBy"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&orderBy=%s", v)
+		}
+		if v, ok := args["recTotal"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recTotal=%d", int(v.(float64)))
+		}
+		if v, ok := args["recPerPage"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&recPerPage=%d", int(v.(float64)))
+		}
+		if v, ok := args["pageID"]; ok && v != nil {
+			queryParams += fmt.Sprintf("&pageID=%d", int(v.(float64)))
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/index.php?m=project&f=build&t=json&%s", queryParams))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project builds: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
 	deleteProjectTool := mcp.NewTool("delete_project",
 		mcp.WithDescription("Delete a project from ZenTao"),
 		mcp.WithNumber("id",
