@@ -1,0 +1,1575 @@
+# ZenTao API Documentation
+
+Total APIs: 82
+
+## API Endpoints
+
+### POST /tokens - Get Token
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| account | string | No | 登录名 |
+| password | string | No | 密码 |
+
+**Request Example:**
+
+```json
+{&quot;account&quot;: &quot;admin&quot;, &quot;password&quot;: &quot;123456&quot;}
+```
+
+---
+
+### GET /feedbacks - Get Feedback List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| solution | No | 反馈处理结果（unclosed 未关闭 | all 全部 | public公开 | tostory 转任务 | totask 转任务 | tobug 转Bug | totodo 转代办 | review 待评审 | assigntome 指派给我） |
+| orderBy | No | 排序，默认id_desc；排序字段+下划线+asc/desc |
+| page | No | 第几页，默认为1 |
+| limit | No | 每页反馈数量，默认20 |
+
+---
+
+### GET /programs - Get Program List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 访问凭证Token |
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| order | No | 排序，默认order_asc；排序字段+下划线+asc/desc |
+
+---
+
+### POST /products - Create Product
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| name | string | Yes | 产品名称 |
+| program | int | No | 所属项目集 |
+| code | int | Yes | 产品代号 |
+| line | int | No | 所属产品线 |
+| PO | 1 | No | 产品负责人 |
+| QD | 1 | No | 测试负责人 |
+| RD | 1 | No | 发布负责人 |
+| type | string | No | 产品类型(normal 正常 | branch 多分支 | ) |
+| desc | string | No | 产品描述 |
+| acl | string | No | 访问控制（open 公开 | private 私有） |
+| whitelist | array | No | 白名单 |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;测试产品&quot;,
+    &quot;code&quot;: &quot;test&quot;,
+    &quot;program&quot;: 1
+}
+```
+
+---
+
+### GET /products - Get Product List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | No | 认证凭证Token |
+
+---
+
+### GET /products/:id - Get Product Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /product/:id - Edit Product
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | No | 访问凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| name | string | No | 产品名称 |
+| code | string | No | 产品代号 |
+| type | string | No | 产品类型(normal 正常 | branch 多分支 | platform 多平台) |
+| line | int | No | 所属产品线 |
+| program | int | No | 所属项目集 |
+| status | string | No | 产品状态(normal 正常 | closed 已关闭) |
+| desc | string | No | 产品描述，富文本 |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;公司企业网站建设1&quot;
+}
+```
+
+---
+
+### POST /projects - Create Project
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| name | string | Yes | 项目名称 |
+| begin | date | Yes | 计划开始日期 |
+| end | date | Yes | 计划结束日期 |
+| products | array | Yes | 关联产品，比如 [1, 2]，不能为空。 |
+| code | string | Yes | 项目编号 |
+| model | string | No | 项目模型，默认为scrum |
+| parent | int | No | 所属项目集，默认为0 |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;test&quot;,
+    &quot;code&quot;: &quot;test&quot;,
+    &quot;begin&quot;: &quot;2021-01-01&quot;,
+    &quot;end&quot;: &quot;2022-01-01&quot;,
+    &quot;products&quot;: [1]
+}
+```
+
+---
+
+### DELETE /product/:id - Delete Product
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /projects - Get Project List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| page | No | 第几页，默认为1 |
+| limit | No | 每页项目数量，默认20 |
+
+---
+
+### GET /projects/:id - Get Project Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /programs/:id - Update Program
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| name | string | No | 项目名称 |
+| parent | string | No | 父项目集，0表示没有父项目集 |
+| PM | string | No | 项目负责人 |
+| budget | int | No | 预算金额 |
+| budgetUnit | string | No | 预算币种(CNY | USD) |
+| desc | string | No | 项目集描述 |
+| begin | date | No | 预计开始日期 |
+| end | date | No | 预计结束日期 |
+| acl | string | No | 访问控制(open 公开 | private 私有) |
+| whitelist | array | No | 白名单 |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;项目集&quot;,
+    &quot;PM&quot;: &quot;admin&quot;
+}
+```
+
+---
+
+### GET /projects/:id/executions - Get Project Execution List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /projects/:id - Update Project
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| name | string | No | 项目名称 |
+| code | string | No | 项目代号 |
+| parent | int | No | 所属项目集 |
+| PM | int | No | 项目负责人 |
+| budget | int | No | 项目预算金额 |
+| budgetUnit | string | No | 预算币种(CNY | USD) |
+| days | int | No | 可用工作日 |
+| desc | string | No | 项目描述 |
+| acl | string | No | 访问控制(open 公开 | private 私有) |
+| whitelist | array | No | 白名单 |
+| auth | string | No | 权限控制(extend 继承 | reset 重新定义) |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;修改项目&quot;,
+    &quot;PM&quot;: &quot;admin&quot;
+}
+```
+
+---
+
+### DELETE /projects/:id - Delete Project
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /projects/:id/executions - Create Execution
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证 |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| project | int | Yes | 所属项目 |
+| name | string | Yes | 执行名称 |
+| code | string | Yes | 执行代号 |
+| begin | date | Yes | 计划开始日期 |
+| end | date | Yes | 计划结束日期 |
+| days | int | No | 可用工作日 |
+| lifetime | string | No | 类型(short 短期 | long 长期 | ops 运维) |
+| PO | string | No | 产品负责人 |
+| PM | string | No | 迭代负责人 |
+| QD | string | No | 测试负责人 |
+| RD | string | No | 发布负责人 |
+| teamMembers | array | No | 团队成员 ["admin"] |
+| desc | string | No | 迭代描述 |
+| acl | string | No | 访问控制(private 私有 | open 继承项目权限) |
+| whitelist | array | No | 白名单 |
+
+**Request Example:**
+
+```json
+{&quot;name&quot;: &quot;测试执行1&quot;, &quot;code&quot;: &quot;test1&quot;, &quot;begin&quot;: &quot;2021-12-01&quot;, &quot;end&quot;: &quot;2021-12-11&quot;, &quot;days&quot;: 10}
+```
+
+---
+
+### GET /programs/:id - Get Program Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### DELETE /programs/:id - Delete Program
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /programs - Create Program
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| name | string | No | 项目名称 |
+| parent | string | No | 父项目集，0表示没有父项目集 |
+| PM | string | No | 项目负责人 |
+| budget | int | No | 预算金额 |
+| budgetUnit | string | No | 预算币种(CNY | USD) |
+| desc | string | No | 项目集描述 |
+| begin | date | No | 预计开始日期 |
+| end | date | No | 预计结束日期 |
+| acl | string | No | 访问控制(open 公开 | private 私有) |
+| whitelist | array | No | 白名单，只有acl = private才生效 |
+
+---
+
+### GET /projects/:id/stories - Get Project Story List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /executions/:id - Update Execution
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证 |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| project | int | Yes | 所属项目 |
+| name | string | Yes | 执行名称 |
+| code | string | Yes | 执行代号 |
+| begin | date | Yes | 计划开始日期 |
+| end | date | Yes | 计划结束日期 |
+| days | int | No | 可用工作日 |
+| lifetime | string | No | 类型(short 短期 | long 长期 | ops 运维) |
+| PO | string | No | 产品负责人 |
+| PM | string | No | 迭代负责人 |
+| QD | string | No | 测试负责人 |
+| RD | string | No | 发布负责人 |
+| teamMembers | array | No | 团队成员 ["admin"] |
+| desc | string | No | 迭代描述 |
+| acl | string | No | 访问控制(private 私有 | open 继承项目权限) |
+| whitelist | array | No | 白名单 |
+
+**Request Example:**
+
+```json
+{&quot;name&quot;: &quot;测试执行1&quot;, &quot;code&quot;: &quot;test1&quot;, &quot;begin&quot;: &quot;2021-12-01&quot;, &quot;end&quot;: &quot;2021-12-11&quot;, &quot;days&quot;: 10}
+```
+
+---
+
+### POST /stories/:id/change - Change Story
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| title | string | No | 需求标题 |
+| spec | string | No | 需求描述 |
+| verify | string | No | 验收标准 |
+
+**Request Example:**
+
+```json
+{
+    &quot;spec&quot;: &quot;变更描述&quot;
+}
+```
+
+---
+
+### GET /executions/:id - Get Execution Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### DELETE /executions/:id - Delete Execution
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /products/:id/stories - Get Product Story List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /stories - Create Story
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| title | string | Yes | 需求标题 |
+| product | int | Yes | 所属产品 |
+| pri | int | Yes | 优先级 |
+| category | string | Yes | 需求类型 |
+| spec | string | No | 需求描述 |
+| verify | string | No | 验收标准 |
+| source | string | No | 需求来源 |
+| sourceNote | string | No | 来源备注 |
+| estimate | float | No | 预计工时 |
+| keywords | string | No | 关键词 |
+
+**Request Example:**
+
+```json
+{
+    &quot;title&quot;: &quot;测试需求&quot;,
+    &quot;spec&quot;: &quot;测试&quot;,
+    &quot;product&quot;: 1,
+    &quot;pri&quot;: 1,
+    &quot;category&quot;: &quot;feature&quot;
+}
+```
+
+---
+
+### GET /executions/:id/stories - Get Execution Story List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /stories/:id - Get Story Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### DELETE /stories/:id - Delete Story
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /executions/:id/tasks - Get Execution Task List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /stories/:id - Update Story Fields
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| module | int | No | 所属模块 |
+| source | string | No | 来源 |
+| sourceNote | string | No | 来源备注 |
+| pri | int | No | 优先级 |
+| category | string | No | 类型(feature 功能 | interface 接口 | performance 性能 | safe 安全 | experience 体验 | improve 改进 | other 其他) |
+| estimate | float | No | 预计工时 |
+| keywords | string | No | 关键词 |
+
+**Request Example:**
+
+```json
+{
+    &quot;category&quot;: &quot;other&quot;
+}
+```
+
+---
+
+### GET /tasks/:id - Get Task Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /executions/:id/tasks - Create Task
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| module | int | No | 所属模块 |
+| story | int | No | 关联需求 |
+| fromBug | int | No | 来自于Bug |
+| name | string | Yes | 任务名称 |
+| type | string | Yes | 任务类型(design 设计 | devel 开发 | request 需求 | test 测试 | study 研究 | discuss 讨论 | ui 界面 | affair 事务 | misc 其他) |
+| assignedTo | array | Yes | 指派给 |
+| pri | int | No | 优先级 |
+| estimate | float | No | 预计工时 |
+| estStarted | date | Yes | 预计开始日期 |
+| deadline | date | Yes | 预计结束日期 |
+| openedBy | 1 | Yes | 创建人 |
+| openedDate | datetime | Yes | 创建时间 |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;testtt&quot;,
+    &quot;assignedTo&quot;: [ &quot;admin&quot; ],
+    &quot;type&quot;: &quot;devel&quot;,
+    &quot;estStarted&quot;: &quot;2021-12-01&quot;,
+    &quot;deadline&quot;: &quot;2021-12-31&quot;
+}
+```
+
+---
+
+### DELETE /tasks/:id - Delete Task
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /products/:id/bugs - Get Product Bug List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /tasks/:id - Update Task
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| module | int | No | 所属模块 |
+| story | int | No | 关联需求 |
+| fromBug | int | No | 来自于Bug |
+| name | string | No | 任务名称 |
+| type | string | No | 任务类型(design 设计 | devel 开发 | request 需求 | test 测试 | study 研究 | discuss 讨论 | ui 界面 | affair 事务 | misc 其他) |
+| assignedTo | array | No | 指派给，["admin"] |
+| pri | int | No | 优先级 |
+| estimate | float | No | 预计工时 |
+| estStarted | date | No | 预计开始日期 |
+| deadline | date | No | 预计结束日期 |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;testtt&quot;,
+    &quot;assignedTo&quot;: [ &quot;admin&quot; ],
+    &quot;type&quot;: &quot;devel&quot;,
+    &quot;estStarted&quot;: &quot;2021-12-01&quot;,
+    &quot;deadline&quot;: &quot;2021-12-31&quot;
+}
+```
+
+---
+
+### POST /products/:id/bugs - Create Bug
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| branch | int | No | 所属分支 |
+| module | int | No | 所属模块 |
+| execution | int | No | 所属执行 |
+| title | string | Yes | Bug标题 |
+| keywords | string | No | 关键词 |
+| severity | int | Yes | 严重程度 |
+| pri | int | Yes | 优先级 |
+| type | string | Yes | Bug类型(codeerror 代码错误 | config 配置相关 | install 安装部署 | security 安全相关 | performance 性能问题 | standard 标准规范 | automation |测试脚本 | designdefect 设计缺陷 | others 其他) |
+| os | string | No | 操作系统 |
+| browser | string | No | 浏览器 |
+| steps | string | No | 重现步骤 |
+| task | int | No | 相关任务 |
+| story | int | No | 相关需求 |
+| deadline | date | No | 截止日期 |
+| openedBuild | array | No | 影响版本 |
+
+**Request Example:**
+
+```json
+{
+    &quot;title&quot;: &quot;Bug2&quot;,
+    &quot;severity&quot;: 1,
+    &quot;pri&quot;: 1,
+    &quot;steps&quot;: &quot;&quot;,
+    &quot;type&quot;: &quot;codeerror&quot;,
+    &quot;openedBuild&quot;: [
+        &quot;trunk&quot;
+    ]
+}
+```
+
+---
+
+### PUT /bugs/:id - Update Bug
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| branch | int | No | 所属分支 |
+| module | int | No | 所属模块 |
+| execution | int | No | 所属执行 |
+| title | string | Yes | Bug标题 |
+| keywords | string | No | 关键词 |
+| severity | int | Yes | 严重程度 |
+| pri | int | Yes | 优先级 |
+| type | string | Yes | Bug类型(codeerror 代码错误 | config 配置相关 | install 安装部署 | security 安全相关 | performance 性能问题 | standard 标准规范 | automation |测试脚本 | designdefect 设计缺陷 | others 其他) |
+| os | string | No | 操作系统 |
+| browser | string | No | 浏览器 |
+| steps | string | No | 重现步骤 |
+| task | int | No | 相关任务 |
+| story | int | No | 相关需求 |
+| deadline | date | No | 截止日期 |
+| openedBuild | array | No | 影响版本 |
+
+**Request Example:**
+
+```json
+{
+    &quot;title&quot;: &quot;Bug2&quot;,
+    &quot;severity&quot;: 1,
+    &quot;pri&quot;: 1,
+    &quot;steps&quot;: &quot;&quot;,
+    &quot;type&quot;: &quot;codeerror&quot;,
+    &quot;openedBuild&quot;: [
+        &quot;trunk&quot;
+    ]
+}
+```
+
+---
+
+### GET /bugs/:id - Get Bug Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### DELETE /bugs/:id - Delete Bug
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /products/:id/testcases - Get Product Test Case List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /products/:id/testcases - Create Test Case
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| branch | int | No | 所属分支 |
+| module | int | No | 所属模块 |
+| story | int | No | 所属需求 |
+| title | string | Yes | 用例标题 |
+| type | string | Yes | 用例类型(feature 功能测试 | performance 性能测试 | config 配置相关 | install 安装部署 | security 安全相关 | interface 接口测试 | unit 单元测试 | other 其他) |
+| stage | string | No | 适用阶段(unittest 单元测试阶段 | feature 功能测试阶段 | intergrate 集成测试阶段 | system 系统测试阶段 | smoke 冒烟测试阶段 | bvt 版本验证阶段) |
+| precondition | string | No | 前置条件 |
+| pri | int | No | 优先级 |
+| steps | array | Yes | 用例步骤 |
+| keywords | string | No | 关键词 |
+
+**Request Example:**
+
+```json
+{
+    &quot;title&quot;: &quot;case1&quot;,
+    &quot;pri&quot;: 1,
+    &quot;steps&quot;: [
+        {
+            &quot;desc&quot;: &quot;步骤1&quot;,
+            &quot;expect&quot;: &quot;结果1&quot;
+        }
+    ],
+    &quot;type&quot;: &quot;feature&quot;
+}
+```
+
+---
+
+### POST /products/:id/plans - Create Plan
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| branch | int | No | 所属分支 |
+| title | string | Yes | 计划名称 |
+| begin | date | No | 计划开始日期 |
+| end | date | No | 计划结束日期 |
+| desc | string | No | 计划描述 |
+| parent | int | No | 所属父计划 |
+
+---
+
+### GET /testcases/:id - Get Test Case Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /testcases/:id - Update Test Case
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| branch | int | No | 所属分支 |
+| module | int | No | 所属模块 |
+| story | int | No | 所属需求 |
+| title | string | No | 用例标题 |
+| type | string | No | 用例类型(feature 功能测试 | performance 性能测试 | config 配置相关 | install 安装部署 | security 安全相关 | interface 接口测试 | unit 单元测试 | other 其他) |
+| stage | string | No | 适用阶段(unittest 单元测试阶段 | feature 功能测试阶段 | intergrate 集成测试阶段 | system 系统测试阶段 | smoke 冒烟测试阶段 | bvt 版本验证阶段) |
+| precondition | string | No | 前置条件 |
+| pri | int | No | 优先级 |
+| steps | array | No | 用例步骤 |
+| keywords | string | No | 关键词 |
+
+**Request Example:**
+
+```json
+{
+    &quot;title&quot;: &quot;case1&quot;,
+    &quot;pri&quot;: 1,
+    &quot;steps&quot;: [
+        {
+            &quot;desc&quot;: &quot;步骤1&quot;,
+            &quot;expect&quot;: &quot;结果1&quot;
+        }
+    ],
+    &quot;type&quot;: &quot;feature&quot;
+}
+```
+
+---
+
+### DELETE /testcases/:id - Delete Test Case
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /products/:id/plans - Get Product Plan List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /productplans/:id - Get Plan Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /productplans/:id - Update Plan
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| branch | int | No | 所属分支 |
+| title | string | Yes | 计划名称 |
+| begin | date | No | 计划开始日期 |
+| end | date | No | 计划结束日期 |
+| desc | string | No | 计划描述 |
+
+---
+
+### DELETE /productsplan/:id - Delete Plan
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /productplans/:id/linkstories - Link Stories to Product Plan
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| stories | array | No | 新增关联的需求，比如 [1, 2] |
+
+**Request Example:**
+
+```json
+{
+    &quot;stories&quot;: [ 11 ]
+}
+```
+
+---
+
+### POST /productplans/:id/unlinkstories - Unlink Stories from Product Plan
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| stories | array | Yes | 取消关联的需求ID，比如 [1, 2] |
+
+**Request Example:**
+
+```json
+{
+    &quot;stories&quot;: [11]
+}
+```
+
+---
+
+### POST /products/:id/linkBugs - Link Bugs to Product Plan
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| bugs | array | Yes | 关联的Bug ID，比如 [1, 2] |
+
+**Request Example:**
+
+```json
+{
+    &quot;bugs&quot;: [7]
+}
+```
+
+---
+
+### POST /productplans/:id/unlinkbugs - Unlink Bugs from Product Plan
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| bugs | array | Yes | 取消关联的Bug ID，比如 [1, 2] |
+
+**Request Example:**
+
+```json
+{
+    &quot;bugs&quot;: [7]
+}
+```
+
+---
+
+### GET /projects/:id/builds - Get Project Build List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /executions/:id/builds - Get Execution Build List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /builds/:id - Update Build
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /projects/:id/builds - Create Build
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| execution | int | Yes | 所属执行 |
+| product | int | Yes | 所属产品 |
+| branch | int | No | 所属分支 |
+| name | string | Yes | 版本名称 |
+| builder | string | Yes | 构建者 |
+| date | date | No | 打包日期 |
+| scmPath | string | No | 源代码地址 |
+| filePath | string | No | 下载地址 |
+| desc | string | No | 版本描述 |
+
+**Request Example:**
+
+```json
+{
+    &quot;name&quot;: &quot;test&quot;,
+    &quot;product&quot;: 4,
+    &quot;date&quot;: &quot;2021-01-01&quot;,
+    &quot;execution&quot;: 42,
+    &quot;builder&quot;: &quot;admin&quot;
+}
+```
+
+---
+
+### GET /builds/:id - Get Build Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### DELETE /builds/:id - Delete Build
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /testtasks - Get Test Task List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| page | No | 当前页数，默认为1 |
+| limit | No | 每页测试单数，默认20个 |
+| order | No | 排序，默认 id_desc 按照id倒序 |
+| product | No | 所属产品 |
+| branch | No | 所属分支 |
+
+---
+
+### GET /projects/:id/testtasks - Get Project Test Tasks
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /users/:id - Get User Info
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /projects/:id/releases - Get Project Release List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /user - Get My Profile
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /testtasks/:id - Get Test Task Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### GET /products/:id/releases - Get Product Release List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### DELETE /users/:id - Delete User
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /users - Create User
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| account | string | Yes | 账号 |
+| password | string | Yes | 密码 |
+| realname | string | No | 真实姓名 |
+| visions | array | No | 界面 [“rnd”, “lite”]，(研发综合界面 rnd, 运营管理界面 lite)。默认是rnd |
+
+**Request Example:**
+
+```json
+{&quot;account&quot;: &quot;usertest&quot;, &quot;password&quot;: &quot;123qwe!@#&quot;, &quot;realname&quot;: &quot;测试用户&quot;}
+```
+
+---
+
+### PUT /users/:id - Update User Info
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证 |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| dept | int | No | 所属部门 |
+| role | string | No | 角色 |
+| mobile | string | No | 手机号 |
+| realname | string | No | 真实姓名 |
+| email | string | No | 邮箱 |
+| phone | string | No | 电话号码 |
+
+**Request Example:**
+
+```json
+{
+    &quot;realname&quot;: &quot;管理员&quot;
+}
+```
+
+---
+
+### GET /users - Get User List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| page | Yes | 当前页数 |
+| limit | Yes | 每页用户数 |
+
+---
+
+### GET /feedbacks/:id - Get Feedback Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /feedbacks/:id - Update Feedback
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| product | int | No | 所属产品 |
+| module | int | No | 所属分类 |
+| title | string | No | 标题 |
+| type | string | No | 类型(story 需求 | task 任务 | bug Bug | todo 代办 | advice 建议) 全新项目集模式还有（issue 问题 | risk 风险 | opportunity 机会） |
+| desc | string | No | 描述 |
+| public | int | No | 公开 |
+| notify | int | No | 通知 |
+| notifyEmail | string | No | 通知邮箱 |
+| feedbackBy | string | No | 反馈者 |
+
+**Request Example:**
+
+```json
+{
+    &quot;title&quot;: &quot;test&quot;,
+    &quot;desc&quot;: &quot;edit test&quot;
+}
+```
+
+---
+
+### DELETE /feedbacks/:id - Delete Feedback
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### POST /feedbacks/:id/assign - Assign Feedback
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| assignedTo | string | No | 指派给，填写用户的account字段 |
+| comment | string | No | 备注 |
+| mailto | string | No | 抄送给，填写用户的account字段并用“,”分开 |
+
+**Request Example:**
+
+```json
+{
+    &quot;assignedTo&quot;: &quot;admin&quot;,
+    &quot;comment&quot;:&quot;yes&quot;
+}
+```
+
+---
+
+### POST /feedbacks/:id/close - Close Feedback
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| closedReason | string | No | 关闭原因（commented 已处理 | repeat 重复 | refuse 不予采纳） |
+| comment | string | No | 备注 |
+
+**Request Example:**
+
+```json
+{
+    &quot;closedReason&quot;:&quot;repeat&quot;
+}
+```
+
+---
+
+### POST /feedbacks - Create Feedback
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| product | int | Yes | 所属产品 |
+| module | int | No | 所属分类 |
+| title | string | Yes | 标题 |
+| type | string | No | 类型(story 需求 | task 任务 | bug Bug | todo 代办 | advice 建议) 全新项目集模式还有（issue 问题 | risk 风险 | opportunity 机会） |
+| desc | string | No | 描述 |
+| public | int | No | 公开 |
+| notify | int | No | 通知 |
+| notifyEmail | string | No | 通知邮箱 |
+| feedbackBy | string | No | 反馈者 |
+
+**Request Example:**
+
+```json
+{
+    &quot;product&quot;: 2,
+    &quot;title&quot;:&quot;create test feedback&quot;
+}
+```
+
+---
+
+### GET /tickets - Get Ticket List
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| browseType | No | 工单状态（all 所有 | wait 待处理 | doing 处理中 | done 待关闭 | finishedbyme 由我解决 | openedbyme 由我创建 | assignedtome 指派给我） |
+| param | No | 模块ID， 默认为0 |
+| orderBy | No | 排序，默认id_desc；排序字段+下划线+asc/desc |
+| page | No | 第几页，默认为1 |
+| limit | No | 每页工单数量，默认20 |
+
+---
+
+### GET /tickets/:id - Get Ticket Details
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
+### PUT /tickets/:id - Update Ticket
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| product | int | Yes | 所属产品ID |
+| module | int | Yes | 所属模块ID |
+| title | string | Yes | 工单名称 |
+| type | string | No | 工单类型(code 程序报错 | data 数据错误 | stuck 流程卡断 | security 安全问题 | affair 事务) |
+| desc | string | No | 工单描述 |
+
+**Request Example:**
+
+```json
+{
+    &quot;title&quot;: &quot;test&quot;,
+    &quot;desc&quot;: &quot;edit test&quot;
+}
+```
+
+---
+
+### POST /tickets - Create Ticket
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| product | Yes | 所属产品ID |
+| module | Yes | 所属模块ID |
+| title | Yes | 工单名称 |
+| type | No | 工单类型(code 程序报错 | data 数据错误 | stuck 流程卡断 | security 安全问题 | affair 事务) |
+
+**Body Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| product | int | Yes | 所属产品ID |
+| module | int | Yes | 所属模块ID |
+| title | string | Yes | 工单名称 |
+| type | string | Yes | 工单类型 |
+
+**Request Example:**
+
+```json
+{
+    &quot;product&quot;: 2,
+    &quot;module&quot;:2,
+    &quot;title&quot;:&quot;create test ticket&quot;
+}
+```
+
+---
+
+### DELETE /tickets/:id - Delete Ticket
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Token | Yes | 认证凭证Token |
+
+---
+
