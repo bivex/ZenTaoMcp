@@ -9,7 +9,7 @@
 
 ## Overview
 
-**ZenTao MCP Server** is a comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides seamless integration between AI assistants and the [ZenTao](https://www.zentao.net/) project management system. Built with Go, this server exposes **400 tools**, **46 resources**, and **2 prompts** covering all major ZenTao modules including products, projects, user stories, tasks, bugs, test cases, releases, builds, and more.
+**ZenTao MCP Server** is a comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides seamless integration between AI assistants and the [ZenTao](https://www.zentao.net/) project management system. Built with Go, this server exposes **518 tools**, **46 resources**, and **2 prompts** covering all major ZenTao modules including products, projects, user stories, tasks, bugs, test cases, releases, builds, and more.
 
 ### What is ZenTao?
 
@@ -21,7 +21,7 @@ The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is an open 
 
 ## Key Features
 
-- **🚀 400 MCP Tools** - Complete CRUD operations for all ZenTao entities (products, projects, stories, tasks, bugs, users, AI features, and more)
+ - **🚀 518 MCP Tools** - Complete CRUD operations for all ZenTao entities (products, projects, stories, tasks, bugs, users, AI features, and more)
 - **📦 46 MCP Resources** - URI-based data access with RESTful resource patterns
 - **🔧 100 Resource Templates** - Dynamic resource access with parameterized URIs
 - **💡 2 MCP Prompts** - Guided workflows for common operations (product creation, story creation)
@@ -40,8 +40,13 @@ The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is an open 
   - Build & Release Management
   - Kanban Boards
   - AI Integration (ZAI)
-  - Node Management (Zanode)
-  - And much more
+   - Node Management (Zanode)
+   - Documentation Management
+   - Datatable and Report Management
+   - Company, Department, Group and User Administration
+   - AI App Management
+   - Business Intelligence (BI)
+   - And much more
 - **📝 Comprehensive Logging** - Detailed logging for debugging and monitoring
 - **⚡ High Performance** - Built with Go for optimal performance and low resource usage
 
@@ -433,25 +438,73 @@ The server provides comprehensive tools for managing all aspects of ZenTao. Here
 - `import_data` - Import data to a module
 - `get_import_table_body` - Get import preview table
 - `get_import_options` - Get import field options
-- `validate_import_data` - Validate import data
-
-### ZAI - ZenTao AI (6 tools)
-- `get_zai_settings` - Get ZAI module settings
-- `update_zai_settings` - Update ZAI settings
-- `get_zai_token` - Get AI authentication token
-- `get_vectorization_status` - Get vectorization status
-- `enable_vectorization` - Enable vectorization
-- `sync_vectorization` - Sync vectorization data
-
-### AI - Artificial Intelligence (23 tools)
-- Mini Programs: `get_mini_programs`, `publish_mini_program`, `unpublish_mini_program`, `import_mini_program`
-- Prompts: `get_prompts`, `create_prompt`, `edit_prompt`, `delete_prompt`, `execute_prompt`, `publish_prompt`
-- Prompt Configuration: `assign_prompt_role`, `select_prompt_data_source`, `set_prompt_purpose`, `set_prompt_target_form`, `finalize_prompt`
-- Prompt Execution: `reset_prompt_execution`, `audit_prompt`, `get_testing_location`
-- Role Templates: `get_role_templates`
-- And more...
-
-### Zanode - Node Management (27 tools)
+   - `validate_import_data` - Validate import data
+ 
+ ### ZAI - ZenTao AI (6 tools)
+ - `get_zai_settings` - Get ZAI module settings
+ - `update_zai_settings` - Update ZAI settings
+ - `get_zai_token` - Get AI authentication token
+ - `get_vectorization_status` - Get vectorization status
+ - `enable_vectorization` - Enable vectorization
+ - `sync_vectorization` - Sync vectorization data
+ 
+ ### AI - Artificial Intelligence (23 tools)
+ - Mini Programs: `get_mini_programs`, `publish_mini_program`, `unpublish_mini_program`, `import_mini_program`
+ - Prompts: `get_prompts`, `create_prompt`, `edit_prompt`, `delete_prompt`, `execute_prompt`, `publish_prompt`
+ - Prompt Configuration: `assign_prompt_role`, `select_prompt_data_source`, `set_prompt_purpose`, `set_prompt_target_form`, `finalize_prompt`
+ - Prompt Execution: `reset_prompt_execution`, `audit_prompt`, `get_testing_location`
+ - Role Templates: `get_role_templates`
+ - And more...
+ 
+ ### Zanode - Node Management (27 tools)
+ - Node Management: `browse_zanodes`, `create_zanode`, `edit_zanode`, `view_zanode`, `get_zanodes`
+ - Lifecycle: `start_zanode`, `close_zanode`, `suspend_zanode`, `reboot_zanode`, `resume_zanode`, `destroy_zanode`
+ - VNC: `get_zanode_vnc` - Get VNC access
+ - Images: `create_zanode_image`, `get_zanode_images`, `get_zanode_image`, `update_zanode_image`
+ - Snapshots: `create_zanode_snapshot`, `edit_zanode_snapshot`, `delete_zanode_snapshot`, `browse_zanode_snapshots`, `restore_zanode_snapshot`
+ - Tasks & Services: `get_zanode_task_status`, `get_zanode_service_status`, `install_zanode_service`
+ - ZTF Scripts: `get_zanode_ztf_script`, `run_zanode_ztf_script`
+ - Instructions: `get_zanode_instructions`
+ 
+ ### Case Library (15 tools)
+ - `get_caselib_index` - Get case library index
+ - `create_caselib` - Create a new case library
+ - `edit_caselib` - Edit an existing case library
+ - `delete_caselib` - Delete a case library
+ - `browse_caselib` - Browse case library with filtering
+ - `view_caselib` - View case library details
+ - `create_caselib_case` - Create a new test case in case library
+ - `batch_create_caselib_cases` - Create multiple test cases
+ - `edit_caselib_case` - Edit a test case in case library
+ - `batch_edit_caselib_cases` - Edit multiple test cases
+ - `view_caselib_case` - View test case details
+ - `export_caselib_template` - Export import template
+ - `import_caselib_cases` - Import test cases to case library
+ - `show_caselib_import` - Show import preview
+ - `export_caselib_cases` - Export test cases from case library
+ 
+ ### QA (1 tool)
+ - `get_qa_index` - Get QA module index
+ 
+ ### Test Report (5 tools)
+ - `browse_testreports` - Browse test reports with filtering
+ - `create_testreport` - Create a new test report
+ - `edit_testreport` - Edit an existing test report
+ - `view_testreport` - View test report details
+ - `delete_testreport` - Delete a test report
+ 
+ ### Test Suite (9 tools)
+ - `get_testsuite_index` - Get test suite index
+ - `browse_testsuites` - Browse test suites with filtering
+ - `create_testsuite` - Create a new test suite
+ - `view_testsuite` - View test suite details
+ - `edit_testsuite` - Edit an existing test suite
+ - `delete_testsuite` - Delete a test suite
+ - `link_case_to_testsuite` - Link test case to test suite
+ - `unlink_case_from_testsuite` - Unlink test case from test suite
+ - `batch_unlink_cases_from_testsuite` - Unlink multiple test cases
+ 
+ ### Zanode - Node Management (27 tools)
 - Node Management: `browse_zanodes`, `create_zanode`, `edit_zanode`, `view_zanode`, `get_zanodes`
 - Lifecycle: `start_zanode`, `close_zanode`, `suspend_zanode`, `reboot_zanode`, `resume_zanode`, `destroy_zanode`
 - VNC: `get_zanode_vnc` - Get VNC access
@@ -765,10 +818,21 @@ prompt://create_product?name=MyProduct&code=MP001
 ## API Documentation
 
 Complete ZenTao REST API documentation is available in the `api_doc.txt` file, which includes:
-- 82+ API endpoints
+- 199+ API endpoints
 - Request/response schemas
 - Required vs optional parameters
 - Example requests
+- Coverage for all major modules:
+  - Products, Projects, Stories, Tasks, Bugs, Users
+  - Test Cases, Test Tasks, Test Reports, Test Suites
+  - Plans, Builds, Releases
+  - Kanban, Epics, Requirements
+  - Documentation Management
+  - Datatable and Reports
+  - Company, Department, Group and User Administration
+  - AI App and Mini Programs
+  - Business Intelligence (BI)
+  - And much more
 
 ## Contributing
 
@@ -795,4 +859,4 @@ Commercial licensing available upon request.
 
 ---
 
-**Keywords:** ZenTao, MCP, Model Context Protocol, Project Management, Bug Tracking, Agile, Scrum, Kanban, Go, REST API, AI Integration, LLM, Claude, GPT, ZenTao API, Project Management System, Agile Development, Software Development, DevOps, CI/CD, Test Management, Requirement Management
+**Keywords:** ZenTao, MCP, Model Context Protocol, Project Management, Bug Tracking, Agile, Scrum, Kanban, Go, REST API, AI Integration, LLM, Claude, GPT, ZenTao API, Project Management System, Agile Development, Software Development, DevOps, CI/CD, Test Management, Requirement Management, Documentation Management, Business Intelligence, BI, Parquet, DuckDB, Administration, User Management, Department Management, Group Management, AI Apps, Mini Programs, Datatable, Reports
