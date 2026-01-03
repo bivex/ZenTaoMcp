@@ -490,21 +490,36 @@ func (c *ZenTaoClient) getCachedToken() (string, int64) {
 
 	currentTime := time.Now().Unix()
 
+	logger.Debug("client", "Checking token cache", map[string]interface{}{
+		"current_time": currentTime,
+		"cached_token_exists": c.cachedToken != "",
+		"cached_timestamp": c.cachedTimestamp,
+		"cached_token_length": len(c.cachedToken),
+	})
+
 	// Check if we have a valid cached token
 	if c.cachedToken != "" && c.cachedTimestamp > 0 {
 		timeDiff := currentTime - c.cachedTimestamp
 		if timeDiff < tokenCacheDuration {
-			logger.Debug("client", "Using cached token", map[string]interface{}{
+			logger.Info("client", "Using cached token", map[string]interface{}{
 				"token_age_seconds": timeDiff,
 				"remaining_seconds": tokenCacheDuration - timeDiff,
+				"cache_hit": true,
 			})
 			return c.cachedToken, c.cachedTimestamp
 		} else {
-			logger.Debug("client", "Cached token expired", map[string]interface{}{
+			logger.Warn("client", "Cached token expired, generating new one", map[string]interface{}{
 				"token_age_seconds": timeDiff,
 				"cache_duration_seconds": tokenCacheDuration,
+				"cache_hit": false,
 			})
 		}
+	} else {
+		logger.Info("client", "No valid cached token, generating new one", map[string]interface{}{
+			"cached_token_empty": c.cachedToken == "",
+			"cached_timestamp_zero": c.cachedTimestamp == 0,
+			"cache_hit": false,
+		})
 	}
 
 	// Generate new token
@@ -515,7 +530,7 @@ func (c *ZenTaoClient) getCachedToken() (string, int64) {
 	c.cachedToken = token
 	c.cachedTimestamp = timestamp
 
-	logger.Debug("client", "Generated and cached new token", map[string]interface{}{
+	logger.Info("client", "Generated and cached new token", map[string]interface{}{
 		"timestamp": timestamp,
 		"token_age_seconds": 0,
 	})
@@ -722,6 +737,18 @@ func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
 		if c.Code != "" && c.Key != "" {
 			token, timestamp := c.getCachedToken()
 
+			logger.Debug("client", "Adding app authentication to request", map[string]interface{}{
+				"path": path,
+				"code": c.Code,
+				"time": timestamp,
+				"token_preview": func() string {
+					if len(token) > 8 {
+						return token[:8] + "..."
+					}
+					return token
+				}(),
+			})
+
 			if params == nil {
 				params = make(map[string]string)
 			}
@@ -752,13 +779,24 @@ func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
 		finalURL = fmt.Sprintf("%s%s&%s", baseURL, path, queryValues.Encode())
 	}
 
-	logger.Debug("client", "Built request URL", map[string]interface{}{
+	logger.Info("client", "Built request URL with authentication", map[string]interface{}{
 		"base_url": baseURL,
 		"path": path,
 		"auth_method": c.authMethod,
 		"auth_added": authAdded,
 		"param_count": len(params),
 		"final_url_length": len(finalURL),
+		"auth_params": func() map[string]string {
+			safeParams := make(map[string]string)
+			for k, v := range params {
+				if k == "token" && len(v) > 8 {
+					safeParams[k] = v[:8] + "..."
+				} else {
+					safeParams[k] = v
+				}
+			}
+			return safeParams
+		}(),
 	})
 
 	return finalURL
@@ -771,17 +809,33 @@ func (c *ZenTaoClient) DoRequest(method, path string, body interface{}, headers 
 func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{}, headers map[string]string, maxRetries int) ([]byte, error) {
 	// Log token cache state at start of request
 	c.tokenMutex.Lock()
-	tokenAge := time.Now().Unix() - c.cachedTimestamp
+	currentTime := time.Now().Unix()
+	tokenAge := currentTime - c.cachedTimestamp
 	hasToken := c.cachedToken != ""
+	cachedTimestamp := c.cachedTimestamp
+	cachedTokenPreview := ""
+	if len(c.cachedToken) > 8 {
+		cachedTokenPreview = c.cachedToken[:8] + "..."
+	}
 	c.tokenMutex.Unlock()
 
-	logger.Debug("client", "Starting request with current token state", map[string]interface{}{
+	// Check if this is a write operation that needs fresh tokens
+	isWriteOperation := method == "POST" || method == "PUT" || method == "DELETE"
+	shouldUseFreshToken := isWriteOperation || c.isTokenCloseToExpiry()
+
+	logger.Info("client", "Starting request with current token cache state", map[string]interface{}{
 		"method": method,
 		"path": path,
 		"has_cached_token": hasToken,
+		"cached_token_preview": cachedTokenPreview,
+		"cached_timestamp": cachedTimestamp,
+		"current_time": currentTime,
 		"token_age_seconds": tokenAge,
 		"cache_duration": tokenCacheDuration,
 		"is_close_to_expiry": c.isTokenCloseToExpiry(),
+		"is_write_operation": isWriteOperation,
+		"should_use_fresh_token": shouldUseFreshToken,
+		"raw_age_calculation": fmt.Sprintf("%d - %d = %d", currentTime, cachedTimestamp, tokenAge),
 	})
 
 	var lastErr error
@@ -799,11 +853,19 @@ func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{},
 			c.forceTokenRefresh()
 			// Small delay before retry
 			time.Sleep(100 * time.Millisecond)
-		} else if c.isTokenCloseToExpiry() {
-			// Proactively refresh token if it's close to expiry (before first attempt)
-			logger.Debug("client", "Proactively refreshing token before request", map[string]interface{}{
+		} else if shouldUseFreshToken {
+			// Proactively refresh token for write operations or if close to expiry
+			logger.Info("client", "Proactively refreshing token before request", map[string]interface{}{
 				"method": method,
 				"path": path,
+				"is_write_operation": isWriteOperation,
+				"is_close_to_expiry": c.isTokenCloseToExpiry(),
+				"reason": func() string {
+					if isWriteOperation {
+						return "write operation requires fresh token"
+					}
+					return "token close to expiry"
+				}(),
 			})
 			c.forceTokenRefresh()
 		}
