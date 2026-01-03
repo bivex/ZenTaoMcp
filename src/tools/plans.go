@@ -214,9 +214,9 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 	linkBugsToPlanTool := mcp.NewTool("link_bugs_to_plan",
 		mcp.WithDescription("Link bugs to a product plan in ZenTao"),
-		mcp.WithNumber("product",
+		mcp.WithNumber("id",
 			mcp.Required(),
-			mcp.Description("Product ID"),
+			mcp.Description("Plan ID"),
 		),
 		mcp.WithArray("bugs",
 			mcp.Required(),
@@ -227,13 +227,13 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 	s.AddTool(linkBugsToPlanTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		args := request.GetArguments()
-		productID := int(args["product"].(float64))
+		id := int(args["id"].(float64))
 
 		body := map[string]interface{}{
 			"bugs": args["bugs"],
 		}
 
-		resp, err := client.Post(fmt.Sprintf("/products/%d/linkBugs", productID), body)
+		resp, err := client.Post(fmt.Sprintf("/productplans/%d/linkbugs", id), body)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to link bugs: %v", err)), nil
 		}
