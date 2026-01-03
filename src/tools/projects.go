@@ -43,7 +43,7 @@ func RegisterProjectTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		mcp.WithArray("products",
 			mcp.Required(),
 			mcp.Description("Associated product IDs"),
-			mcp.Items(mcp.NewSchema().WithType("number")),
+			mcp.Items(map[string]any{"type": "number"}),
 		),
 		mcp.WithString("model",
 			mcp.Description("Project model (scrum|agileplus|waterfall|kanban)"),

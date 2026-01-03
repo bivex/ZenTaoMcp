@@ -163,7 +163,7 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		mcp.WithArray("stories",
 			mcp.Required(),
 			mcp.Description("Story IDs to link"),
-			mcp.Items(mcp.NewSchema().WithType("number")),
+			mcp.Items(map[string]any{"type": "number"}),
 		),
 	)
 
@@ -192,7 +192,7 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		mcp.WithArray("stories",
 			mcp.Required(),
 			mcp.Description("Story IDs to unlink"),
-			mcp.Items(mcp.NewSchema().WithType("number")),
+			mcp.Items(map[string]any{"type": "number"}),
 		),
 	)
 
@@ -221,7 +221,7 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		mcp.WithArray("bugs",
 			mcp.Required(),
 			mcp.Description("Bug IDs to link"),
-			mcp.Items(mcp.NewSchema().WithType("number")),
+			mcp.Items(map[string]any{"type": "number"}),
 		),
 	)
 
@@ -250,7 +250,7 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		mcp.WithArray("bugs",
 			mcp.Required(),
 			mcp.Description("Bug IDs to unlink"),
-			mcp.Items(mcp.NewSchema().WithType("number")),
+			mcp.Items(map[string]any{"type": "number"}),
 		),
 	)
 

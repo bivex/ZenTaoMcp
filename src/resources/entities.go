@@ -30,7 +30,7 @@ func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	)
 
 	s.AddResource(productStoriesResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.Uri, "products")
+		id := extractIDFromURI(request.Params.URI, "products")
 
 		resp, err := client.Get(fmt.Sprintf("/products/%s/stories", id))
 		if err != nil {
@@ -39,8 +39,8 @@ func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      request.Params.Uri,
-				MimeType: "application/json",
+				URI:      request.Params.URI,
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
@@ -54,7 +54,7 @@ func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	)
 
 	s.AddResource(storyDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.Uri, "stories")
+		id := extractIDFromURI(request.Params.URI, "stories")
 
 		resp, err := client.Get(fmt.Sprintf("/stories/%s", id))
 		if err != nil {
@@ -63,8 +63,8 @@ func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      request.Params.Uri,
-				MimeType: "application/json",
+				URI:      request.Params.URI,
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
@@ -80,7 +80,7 @@ func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	)
 
 	s.AddResource(executionTasksResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.Uri, "executions")
+		id := extractIDFromURI(request.Params.URI, "executions")
 
 		resp, err := client.Get(fmt.Sprintf("/executions/%s/tasks", id))
 		if err != nil {
@@ -89,8 +89,8 @@ func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      request.Params.Uri,
-				MimeType: "application/json",
+				URI:      request.Params.URI,
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
@@ -104,7 +104,7 @@ func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	)
 
 	s.AddResource(taskDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.Uri, "tasks")
+		id := extractIDFromURI(request.Params.URI, "tasks")
 
 		resp, err := client.Get(fmt.Sprintf("/tasks/%s", id))
 		if err != nil {
@@ -113,8 +113,8 @@ func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      request.Params.Uri,
-				MimeType: "application/json",
+				URI:      request.Params.URI,
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
@@ -130,7 +130,7 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	)
 
 	s.AddResource(productBugsResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.Uri, "products")
+		id := extractIDFromURI(request.Params.URI, "products")
 
 		resp, err := client.Get(fmt.Sprintf("/products/%s/bugs", id))
 		if err != nil {
@@ -139,8 +139,8 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      request.Params.Uri,
-				MimeType: "application/json",
+				URI:      request.Params.URI,
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
@@ -154,7 +154,7 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	)
 
 	s.AddResource(bugDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.Uri, "bugs")
+		id := extractIDFromURI(request.Params.URI, "bugs")
 
 		resp, err := client.Get(fmt.Sprintf("/bugs/%s", id))
 		if err != nil {
@@ -163,8 +163,8 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      request.Params.Uri,
-				MimeType: "application/json",
+				URI:      request.Params.URI,
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
@@ -180,7 +180,7 @@ func RegisterUserResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	)
 
 	s.AddResource(userDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.Uri, "users")
+		id := extractIDFromURI(request.Params.URI, "users")
 
 		resp, err := client.Get(fmt.Sprintf("/users/%s", id))
 		if err != nil {
@@ -189,8 +189,8 @@ func RegisterUserResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      request.Params.Uri,
-				MimeType: "application/json",
+				URI:      request.Params.URI,
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
@@ -211,8 +211,8 @@ func RegisterUserResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				Uri:      "zentao://user",
-				MimeType: "application/json",
+				URI:      "zentao://user",
+				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
