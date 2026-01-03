@@ -51,12 +51,12 @@ func main() {
 	key := os.Getenv("ZENTAO_APP_KEY")
 
 	logger.Info("server", "Configuration loaded", map[string]interface{}{
-		"base_url":        baseURL,
-		"auth_method":     authMethod,
-		"has_app_code":    code != "",
-		"has_app_key":     key != "",
-		"log_level":       os.Getenv("ZENTAO_LOG_LEVEL"),
-		"log_json":        os.Getenv("ZENTAO_LOG_JSON"),
+		"base_url":     baseURL,
+		"auth_method":  authMethod,
+		"has_app_code": code != "",
+		"has_app_key":  key != "",
+		"log_level":    os.Getenv("ZENTAO_LOG_LEVEL"),
+		"log_json":     os.Getenv("ZENTAO_LOG_JSON"),
 	})
 
 	// Initialize ZenTao client based on auth method
@@ -231,8 +231,11 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering test suite tools", nil)
 	tools.RegisterTestSuiteTools(s, ztClient)
 
+	logger.Debug("server", "Registering documentation tools", nil)
+	tools.RegisterDocTools(s, ztClient)
+
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 400,
+		"total_tools": 424,
 	})
 }
 
@@ -331,9 +334,9 @@ func registerResources(s *server.MCPServer) {
 	resources.RegisterTestSuiteResources(s, ztClient)
 
 	logger.Info("server", "All resource registrations completed", map[string]interface{}{
-		"total_resources": 46,
+		"total_resources":      46,
 		"templates_registered": 100,
-		"note": "List resources + resource templates for individual/scoped access",
+		"note":                 "List resources + resource templates for individual/scoped access",
 	})
 }
 
