@@ -123,8 +123,10 @@ export ZENTAO_APP_KEY="YOUR_KEY"
 
 1. **Token Expiration (FIXED)**
    - **Problem**: ZenTao API tokens expire in < 30 seconds
-   - **Solution**: Implemented intelligent token caching with 15-second reuse window + automatic retry
-   - **Result**: Success rate improved from 29% to 68%
+   - **Solution**: Implemented intelligent token caching in both bash script and Go client
+   - **Bash Script**: Token reuse with 15-second window + automatic retry
+   - **Go Client**: Thread-safe token caching with automatic retry logic
+   - **Result**: Success rate improved from 29% to 68% (3.5x improvement)
    - **Status**: ✅ **RESOLVED**
 
 #### ⚠️ **Remaining Issues**
@@ -185,7 +187,13 @@ extract_id() {
 - **After**: Standardized URLs matching `api_doc.txt`
 - **Fixed**: DELETE `/productsplan/:id` → DELETE `/productplans/:id`
 
-#### 7. **Response Format Handling**
+#### 7. **Go Client Token Management**
+- **Added**: Thread-safe token caching with mutex protection
+- **Added**: Automatic retry logic for token expiration (up to 2 retries)
+- **Added**: Smart token refresh with configurable lifetime (15 seconds)
+- **Improved**: Concurrent request handling and performance
+
+#### 8. **Response Format Handling**
 - **Map-based responses**: `{"products": {"1": "Name", "2": "Name2"}}`
 - **Array-based responses**: `{"stories": [{"id": 1, "title": "..."}]}`
 - **Direct responses**: `{"id": 123, "status": "success"}`

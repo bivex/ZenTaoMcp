@@ -30,13 +30,18 @@ import (
 )
 
 type ZenTaoClient struct {
-	BaseURL   string
-	Code      string
-	Key       string
-	Token     string
-	Client    *http.Client
-	lastTime  int64
-	timeMutex sync.Mutex
+	BaseURL       string
+	Code          string
+	Key           string
+	Token         string
+	Client        *http.Client
+	lastTime      int64
+	timeMutex     sync.Mutex
+
+	// Token caching for reuse
+	cachedToken     string
+	cachedTimestamp int64
+	tokenMutex      sync.Mutex
 }
 
 func NewZenTaoClient(baseURL string) *ZenTaoClient {
@@ -443,14 +448,67 @@ func (c *ZenTaoClient) convertRESTPath(method, path string) (string, map[string]
 	return queryPath, params
 }
 
+// getCachedToken returns a cached token if valid, or generates a new one
+func (c *ZenTaoClient) getCachedToken() (string, int64) {
+	c.tokenMutex.Lock()
+	defer c.tokenMutex.Unlock()
+
+	currentTime := time.Now().Unix()
+	tokenLifetime := int64(15) // Conservative 15-second lifetime
+
+	// Check if we have a valid cached token
+	if c.cachedToken != "" && c.cachedTimestamp > 0 {
+		timeDiff := currentTime - c.cachedTimestamp
+		if timeDiff < tokenLifetime {
+			logger.Debug("client", "Using cached token", map[string]interface{}{
+				"token_age_seconds": timeDiff,
+				"remaining_seconds": tokenLifetime - timeDiff,
+			})
+			return c.cachedToken, c.cachedTimestamp
+		} else {
+			logger.Debug("client", "Cached token expired", map[string]interface{}{
+				"token_age_seconds": timeDiff,
+				"token_lifetime": tokenLifetime,
+			})
+		}
+	}
+
+	// Generate new token
+	timestamp := c.getTimestamp()
+	token := c.generateToken(timestamp)
+
+	// Cache the new token
+	c.cachedToken = token
+	c.cachedTimestamp = timestamp
+
+	logger.Debug("client", "Generated and cached new token", map[string]interface{}{
+		"timestamp": timestamp,
+		"token_age_seconds": 0,
+	})
+
+	return token, timestamp
+}
+
+// forceTokenRefresh clears the token cache to force generation of a new token
+func (c *ZenTaoClient) forceTokenRefresh() {
+	c.tokenMutex.Lock()
+	defer c.tokenMutex.Unlock()
+
+	logger.Debug("client", "Forcing token refresh", map[string]interface{}{
+		"previous_token_age": time.Now().Unix() - c.cachedTimestamp,
+	})
+
+	c.cachedToken = ""
+	c.cachedTimestamp = 0
+}
+
 func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
 	baseURL := c.BaseURL
 	authAdded := false
 
 	// Add authentication if available
 	if c.Code != "" && c.Key != "" {
-		timestamp := c.getTimestamp()
-		token := c.generateToken(timestamp)
+		token, timestamp := c.getCachedToken()
 
 		if params == nil {
 			params = make(map[string]string)
@@ -482,6 +540,85 @@ func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
 }
 
 func (c *ZenTaoClient) DoRequest(method, path string, body interface{}, headers map[string]string) ([]byte, error) {
+	return c.doRequestWithRetry(method, path, body, headers, 2)
+}
+
+func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{}, headers map[string]string, maxRetries int) ([]byte, error) {
+	var lastErr error
+	var responseBody []byte
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			logger.Debug("client", "Retrying request due to token expiration", map[string]interface{}{
+				"attempt": attempt,
+				"max_retries": maxRetries,
+				"method": method,
+				"path": path,
+			})
+			// Force token refresh on retry
+			c.forceTokenRefresh()
+			// Small delay before retry
+			time.Sleep(100 * time.Millisecond)
+		}
+
+		resp, err := c.doRequestSingle(method, path, body, headers)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		responseBody = resp
+
+		// Check if response indicates token expiration
+		if c.isTokenExpired(responseBody) {
+			if attempt < maxRetries {
+				logger.Warn("client", "Token expired, will retry with fresh token", map[string]interface{}{
+					"attempt": attempt + 1,
+					"max_retries": maxRetries,
+					"method": method,
+					"path": path,
+				})
+				continue
+			} else {
+				logger.Error("client", "Token expired after maximum retries", nil, map[string]interface{}{
+					"attempts": maxRetries + 1,
+					"method": method,
+					"path": path,
+				})
+				return nil, fmt.Errorf("token expired after %d attempts", maxRetries+1)
+			}
+		}
+
+		// Success - return the response
+		return responseBody, nil
+	}
+
+	return nil, lastErr
+}
+
+func (c *ZenTaoClient) isTokenExpired(responseBody []byte) bool {
+	// Check for common token expiration indicators
+	var response map[string]interface{}
+	if err := json.Unmarshal(responseBody, &response); err != nil {
+		return false // Can't parse, assume not token error
+	}
+
+	// Check for ZenTao-specific token error codes
+	if errcode, ok := response["errcode"].(float64); ok && errcode == 405 {
+		return true
+	}
+
+	// Check for error messages containing token-related text
+	if errmsg, ok := response["errmsg"].(string); ok {
+		if strings.Contains(strings.ToLower(errmsg), "token") {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *ZenTaoClient) doRequestSingle(method, path string, body interface{}, headers map[string]string) ([]byte, error) {
 	startTime := time.Now()
 
 	logger.Debug("client", "Starting HTTP request", map[string]interface{}{
