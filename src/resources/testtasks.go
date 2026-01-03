@@ -15,6 +15,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -45,14 +46,23 @@ func RegisterTestTaskResources(s *server.MCPServer, client *client.ZenTaoClient)
 	})
 
 	testTaskDetailResource := mcp.NewResource(
-		"zentao://testtasks/{id}",
+		"zentao://testtask/*",
 		"ZenTao Test Task Details",
-		mcp.WithResourceDescription("Details of a specific test task by ID (use ID in URI)"),
+		mcp.WithResourceDescription("Details of a specific test task (use zentao://testtask/123)"),
 		mcp.WithMIMEType("application/json"),
 	)
 
 	s.AddResource(testTaskDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "testtasks")
+		// Extract ID from URI path
+		uriParts := strings.Split(request.Params.URI, "/")
+		if len(uriParts) < 3 {
+			return nil, fmt.Errorf("invalid test task URI format. Use: zentao://testtask/123")
+		}
+		id := uriParts[len(uriParts)-1]
+
+		if id == "" || id == "*" {
+			return nil, fmt.Errorf("test task ID not specified in URI. Use format: zentao://testtask/123")
+		}
 
 		resp, err := client.Get(fmt.Sprintf("/testtasks/%s", id))
 		if err != nil {

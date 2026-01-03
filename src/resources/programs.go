@@ -15,6 +15,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -45,14 +46,23 @@ func RegisterProgramResources(s *server.MCPServer, client *client.ZenTaoClient) 
 	})
 
 	programDetailResource := mcp.NewResource(
-		"zentao://programs/{id}",
+		"zentao://program/*",
 		"ZenTao Program Details",
-		mcp.WithResourceDescription("Details of a specific program by ID (use ID in URI)"),
+		mcp.WithResourceDescription("Details of a specific program (use zentao://program/123)"),
 		mcp.WithMIMEType("application/json"),
 	)
 
 	s.AddResource(programDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "programs")
+		// Extract ID from URI path
+		uriParts := strings.Split(request.Params.URI, "/")
+		if len(uriParts) < 3 {
+			return nil, fmt.Errorf("invalid program URI format. Use: zentao://program/123")
+		}
+		id := uriParts[len(uriParts)-1]
+
+		if id == "" || id == "*" {
+			return nil, fmt.Errorf("program ID not specified in URI. Use format: zentao://program/123")
+		}
 
 		resp, err := client.Get(fmt.Sprintf("/programs/%s", id))
 		if err != nil {

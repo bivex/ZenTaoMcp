@@ -374,7 +374,7 @@ The server exposes the following resources for data access:
 }
 ```
 
-### Get/List Operations
+### Get/List Operations (Tools)
 ```json
 {
   "tool": "get_products",
@@ -405,6 +405,33 @@ The server exposes the following resources for data access:
   }
 }
 ```
+
+### Resource URIs (Direct Access)
+
+#### List Resources
+- `zentao://products` - List all products
+- `zentao://projects` - List all projects
+- `zentao://testtasks` - List all test tasks
+- `zentao://users` - List all users
+
+#### Individual Item Resources
+- `zentao://product/123` - Get specific product details
+- `zentao://project/123` - Get specific project details
+- `zentao://story/123` - Get specific story details
+- `zentao://task/123` - Get specific task details
+- `zentao://bug/123` - Get specific bug details
+- `zentao://user/123` - Get specific user details
+- `zentao://testtask/123` - Get specific test task details
+- `zentao://program/123` - Get specific program details
+
+#### Scoped List Resources
+- `zentao://projects/{id}/executions` - Executions for a specific project
+- `zentao://projects/{id}/stories` - Stories for a specific project
+- `zentao://products/{id}/stories` - Stories for a specific product
+- `zentao://products/{id}/bugs` - Bugs for a specific product
+- `zentao://executions/{id}/tasks` - Tasks for a specific execution
+- `zentao://executions/{id}/stories` - Stories for a specific execution
+- `zentao://projects/{id}/testtasks` - Test tasks for a specific project
 
 ### Create a Product
 ```json
