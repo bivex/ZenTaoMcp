@@ -15,7 +15,6 @@ package resources
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -45,36 +44,34 @@ func RegisterProgramResources(s *server.MCPServer, client *client.ZenTaoClient) 
 		}, nil
 	})
 
-	programDetailResource := mcp.NewResource(
-		"zentao://program/*",
-		"ZenTao Program Details",
-		mcp.WithResourceDescription("Details of a specific program (use zentao://program/123)"),
-		mcp.WithMIMEType("application/json"),
+	// Register program detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://program/{id}", "ZenTao Program Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI template variables (MCP library handles this)
+			id := ""
+			if idVal, ok := request.Params.Arguments["id"]; ok {
+				if idStr, ok := idVal.(string); ok {
+					id = idStr
+				}
+			}
+
+			if id == "" {
+				return nil, fmt.Errorf("program ID not found in URI template")
+			}
+
+			resp, err := client.Get(fmt.Sprintf("/programs/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get program details: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
-
-	s.AddResource(programDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		// Extract ID from URI path
-		uriParts := strings.Split(request.Params.URI, "/")
-		if len(uriParts) < 3 {
-			return nil, fmt.Errorf("invalid program URI format. Use: zentao://program/123")
-		}
-		id := uriParts[len(uriParts)-1]
-
-		if id == "" || id == "*" {
-			return nil, fmt.Errorf("program ID not specified in URI. Use format: zentao://program/123")
-		}
-
-		resp, err := client.Get(fmt.Sprintf("/programs/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get program details: %w", err)
-		}
-
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
 }

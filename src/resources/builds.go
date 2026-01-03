@@ -15,7 +15,6 @@ package resources
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -26,36 +25,34 @@ func RegisterBuildResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	// Note: No general /builds endpoint in ZenTao API
 	// Builds are accessed via projects/executions
 
-	buildDetailResource := mcp.NewResource(
-		"zentao://build/*",
-		"ZenTao Build Details",
-		mcp.WithResourceDescription("Details of a specific build (use zentao://build/123)"),
-		mcp.WithMIMEType("application/json"),
+	// Register build detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://build/{id}", "ZenTao Build Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI template variables (MCP library handles this)
+			id := ""
+			if idVal, ok := request.Params.Arguments["id"]; ok {
+				if idStr, ok := idVal.(string); ok {
+					id = idStr
+				}
+			}
+
+			if id == "" {
+				return nil, fmt.Errorf("build ID not found in URI template")
+			}
+
+			resp, err := client.Get(fmt.Sprintf("/builds/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get build details: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
-
-	s.AddResource(buildDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		// Extract ID from URI path
-		uriParts := strings.Split(request.Params.URI, "/")
-		if len(uriParts) < 3 {
-			return nil, fmt.Errorf("invalid build URI format. Use: zentao://build/123")
-		}
-		id := uriParts[len(uriParts)-1]
-
-		if id == "" || id == "*" {
-			return nil, fmt.Errorf("build ID not specified in URI. Use format: zentao://build/123")
-		}
-
-		resp, err := client.Get(fmt.Sprintf("/builds/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get build details: %w", err)
-		}
-
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
 }

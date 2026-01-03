@@ -15,7 +15,6 @@ package resources
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -45,60 +44,65 @@ func RegisterTestTaskResources(s *server.MCPServer, client *client.ZenTaoClient)
 		}, nil
 	})
 
-	testTaskDetailResource := mcp.NewResource(
-		"zentao://testtask/*",
-		"ZenTao Test Task Details",
-		mcp.WithResourceDescription("Details of a specific test task (use zentao://testtask/123)"),
-		mcp.WithMIMEType("application/json"),
+	// Register test task detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://testtask/{id}", "ZenTao Test Task Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI template variables (MCP library handles this)
+			id := ""
+			if idVal, ok := request.Params.Arguments["id"]; ok {
+				if idStr, ok := idVal.(string); ok {
+					id = idStr
+				}
+			}
+
+			if id == "" {
+				return nil, fmt.Errorf("test task ID not found in URI template")
+			}
+
+			resp, err := client.Get(fmt.Sprintf("/testtasks/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get test task details: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
 
-	s.AddResource(testTaskDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		// Extract ID from URI path
-		uriParts := strings.Split(request.Params.URI, "/")
-		if len(uriParts) < 3 {
-			return nil, fmt.Errorf("invalid test task URI format. Use: zentao://testtask/123")
-		}
-		id := uriParts[len(uriParts)-1]
+	// Register project test tasks resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://projects/{id}/testtasks", "ZenTao Project Test Tasks"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI template variables (MCP library handles this)
+			id := ""
+			if idVal, ok := request.Params.Arguments["id"]; ok {
+				if idStr, ok := idVal.(string); ok {
+					id = idStr
+				}
+			}
 
-		if id == "" || id == "*" {
-			return nil, fmt.Errorf("test task ID not specified in URI. Use format: zentao://testtask/123")
-		}
+			if id == "" {
+				return nil, fmt.Errorf("project ID not found in URI template")
+			}
 
-		resp, err := client.Get(fmt.Sprintf("/testtasks/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get test task details: %w", err)
-		}
+			resp, err := client.Get(fmt.Sprintf("/projects/%s/testtasks", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get project test tasks: %w", err)
+			}
 
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
-
-	projectTestTasksResource := mcp.NewResource(
-		"zentao://projects/{id}/testtasks",
-		"ZenTao Project Test Tasks",
-		mcp.WithResourceDescription("Test tasks for a specific project (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
-
-	s.AddResource(projectTestTasksResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "projects")
-
-		resp, err := client.Get(fmt.Sprintf("/projects/%s/testtasks", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get project test tasks: %w", err)
-		}
-
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
 }

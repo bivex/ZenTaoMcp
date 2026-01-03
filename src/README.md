@@ -413,6 +413,7 @@ The server exposes the following resources for data access:
 - `zentao://projects` - List all projects
 - `zentao://testtasks` - List all test tasks
 - `zentao://users` - List all users
+- `zentao://bugs` - List all bugs
 
 #### Individual Item Resources
 - `zentao://product/123` - Get specific product details
@@ -423,15 +424,18 @@ The server exposes the following resources for data access:
 - `zentao://user/123` - Get specific user details
 - `zentao://testtask/123` - Get specific test task details
 - `zentao://program/123` - Get specific program details
+- `zentao://build/123` - Get specific build details
+- `zentao://plan/123` - Get specific plan details
+- `zentao://execution/123` - Get specific execution details
 
 #### Scoped List Resources
-- `zentao://projects/{id}/executions` - Executions for a specific project
-- `zentao://projects/{id}/stories` - Stories for a specific project
-- `zentao://products/{id}/stories` - Stories for a specific product
-- `zentao://products/{id}/bugs` - Bugs for a specific product
-- `zentao://executions/{id}/tasks` - Tasks for a specific execution
-- `zentao://executions/{id}/stories` - Stories for a specific execution
-- `zentao://projects/{id}/testtasks` - Test tasks for a specific project
+- `zentao://projects/123/executions` - Executions for a specific project
+- `zentao://projects/123/stories` - Stories for a specific project
+- `zentao://products/123/stories` - Stories for a specific product
+- `zentao://products/123/bugs` - Bugs for a specific product
+- `zentao://executions/123/tasks` - Tasks for a specific execution
+- `zentao://executions/123/stories` - Stories for a specific execution
+- `zentao://projects/123/testtasks` - Test tasks for a specific project
 
 ### Create a Product
 ```json
