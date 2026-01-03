@@ -335,20 +335,37 @@ The server will communicate via stdio, following the MCP protocol.
 
 The server exposes the following resources for data access:
 
-- `zentao://products` - List all products
-- `zentao://products/{id}` - Get product details
-- `zentao://products/{id}/stories` - Get product stories
-- `zentao://products/{id}/bugs` - Get product bugs
-- `zentao://projects` - List all projects
-- `zentao://projects/{id}` - Get project details
-- `zentao://projects/{id}/executions` - Get project executions
-- `zentao://projects/{id}/stories` - Get project stories
-- `zentao://executions/{id}/tasks` - Get execution tasks
-- `zentao://stories/{id}` - Get story details
-- `zentao://tasks/{id}` - Get task details
-- `zentao://bugs/{id}` - Get bug details
-- `zentao://users/{id}` - Get user details
-- `zentao://user` - Get current user profile
+### ✅ Working List Resources
+- `zentao://products` - List all products (rich data)
+- `zentao://projects` - List all projects/programs (program tree)
+- `zentao://programs` - List all programs (4 test programs)
+- `zentao://testtasks` - List all test tasks (empty but functional)
+- `zentao://bugs` - List all bugs (rich data)
+
+### ✅ Working Individual Item Resources
+- `zentao://product/{id}` - Get specific product details
+- `zentao://project/{id}` - Get specific project details
+- `zentao://story/{id}` - Get specific story details
+- `zentao://task/{id}` - Get specific task details
+- `zentao://bug/{id}` - Get specific bug details
+- `zentao://testtask/{id}` - Get specific test task details
+- `zentao://program/{id}` - Get specific program details
+- `zentao://build/{id}` - Get specific build details
+- `zentao://plan/{id}` - Get specific plan details
+- `zentao://execution/{id}` - Get specific execution details
+
+### ✅ Working Scoped List Resources
+- `zentao://projects/{id}/executions` - Executions for a specific project
+- `zentao://projects/{id}/stories` - Stories for a specific project
+- `zentao://products/{id}/stories` - Stories for a specific product
+- `zentao://products/{id}/bugs` - Bugs for a specific product
+- `zentao://executions/{id}/tasks` - Tasks for a specific execution
+- `zentao://executions/{id}/stories` - Stories for a specific execution
+- `zentao://projects/{id}/testtasks` - Test tasks for a specific project
+
+### ❌ Currently Non-Functional List Resources
+- `zentao://users` - List all users (returns "No content available")
+- `zentao://user` - Get current user profile (returns "No content available")
 
 ## Example Usage
 
@@ -408,27 +425,26 @@ The server exposes the following resources for data access:
 
 ### Resource URIs (Direct Access)
 
-#### List Resources
-- `zentao://products` - List all products
-- `zentao://projects` - List all projects
-- `zentao://testtasks` - List all test tasks
-- `zentao://users` - List all users
-- `zentao://bugs` - List all bugs
+#### ✅ Working List Resources
+- `zentao://products` - List all products (rich data)
+- `zentao://projects` - List all projects/programs (program tree)
+- `zentao://programs` - List all programs (4 test programs)
+- `zentao://testtasks` - List all test tasks (empty but functional)
+- `zentao://bugs` - List all bugs (rich data)
 
-#### Individual Item Resources
+#### ✅ Working Individual Item Resources
 - `zentao://product/123` - Get specific product details
 - `zentao://project/123` - Get specific project details
 - `zentao://story/123` - Get specific story details
 - `zentao://task/123` - Get specific task details
 - `zentao://bug/123` - Get specific bug details
-- `zentao://user/123` - Get specific user details
 - `zentao://testtask/123` - Get specific test task details
 - `zentao://program/123` - Get specific program details
 - `zentao://build/123` - Get specific build details
 - `zentao://plan/123` - Get specific plan details
 - `zentao://execution/123` - Get specific execution details
 
-#### Scoped List Resources
+#### ✅ Working Scoped List Resources
 - `zentao://projects/123/executions` - Executions for a specific project
 - `zentao://projects/123/stories` - Stories for a specific project
 - `zentao://products/123/stories` - Stories for a specific product
@@ -436,6 +452,10 @@ The server exposes the following resources for data access:
 - `zentao://executions/123/tasks` - Tasks for a specific execution
 - `zentao://executions/123/stories` - Stories for a specific execution
 - `zentao://projects/123/testtasks` - Test tasks for a specific project
+
+#### ❌ Non-Functional List Resources
+- `zentao://users` - List all users (returns "No content available")
+- `zentao://user` - Get current user profile (returns "No content available")
 
 ### Create a Product
 ```json

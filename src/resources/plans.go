@@ -29,16 +29,12 @@ func RegisterPlanResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://plan/{id}", "ZenTao Product Plan Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "plan")
 
 			if id == "" {
-				return nil, fmt.Errorf("plan ID not found in URI template")
+				return nil, fmt.Errorf("plan ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/productplans/%s", id))

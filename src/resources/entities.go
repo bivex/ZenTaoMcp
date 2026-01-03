@@ -29,16 +29,12 @@ func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://products/{id}/stories", "ZenTao Product Stories"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "products")
 
 			if id == "" {
-				return nil, fmt.Errorf("product ID not found in URI template")
+				return nil, fmt.Errorf("product ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/products/%s/stories", id))
@@ -60,16 +56,12 @@ func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://story/{id}", "ZenTao Story Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "story")
 
 			if id == "" {
-				return nil, fmt.Errorf("story ID not found in URI template")
+				return nil, fmt.Errorf("story ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/stories/%s", id))
@@ -96,16 +88,12 @@ func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://executions/{id}/tasks", "ZenTao Execution Tasks"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "executions")
 
 			if id == "" {
-				return nil, fmt.Errorf("execution ID not found in URI template")
+				return nil, fmt.Errorf("execution ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/executions/%s/tasks", id))
@@ -127,16 +115,12 @@ func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://task/{id}", "ZenTao Task Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "task")
 
 			if id == "" {
-				return nil, fmt.Errorf("task ID not found in URI template")
+				return nil, fmt.Errorf("task ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/tasks/%s", id))
@@ -182,16 +166,12 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://products/{id}/bugs", "ZenTao Product Bugs"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "products")
 
 			if id == "" {
-				return nil, fmt.Errorf("product ID not found in URI template")
+				return nil, fmt.Errorf("product ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/products/%s/bugs", id))
@@ -213,16 +193,12 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://bug/{id}", "ZenTao Bug Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "bug")
 
 			if id == "" {
-				return nil, fmt.Errorf("bug ID not found in URI template")
+				return nil, fmt.Errorf("bug ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/bugs/%s", id))
@@ -268,16 +244,12 @@ func RegisterUserResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://user/{id}", "ZenTao User Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually since MCP library may not populate Arguments
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "user")
 
 			if id == "" {
-				return nil, fmt.Errorf("user ID not found in URI template")
+				return nil, fmt.Errorf("user ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/users/%s", id))

@@ -60,16 +60,12 @@ func RegisterProductResources(s *server.MCPServer, client *client.ZenTaoClient) 
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://product/{id}", "ZenTao Product Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "product")
 
 			if id == "" {
-				return nil, fmt.Errorf("product ID not found in URI template")
+				return nil, fmt.Errorf("product ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/products/%s", id))
@@ -115,16 +111,12 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://project/{id}", "ZenTao Project Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "project")
 
 			if id == "" {
-				return nil, fmt.Errorf("project ID not found in URI template")
+				return nil, fmt.Errorf("project ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/projects/%s", id))
@@ -146,16 +138,12 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://projects/{id}/executions", "ZenTao Project Executions"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "projects")
 
 			if id == "" {
-				return nil, fmt.Errorf("project ID not found in URI template")
+				return nil, fmt.Errorf("project ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/projects/%s/executions", id))
@@ -177,16 +165,12 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://projects/{id}/stories", "ZenTao Project Stories"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "projects")
 
 			if id == "" {
-				return nil, fmt.Errorf("project ID not found in URI template")
+				return nil, fmt.Errorf("project ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/projects/%s/stories", id))
@@ -208,16 +192,12 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://execution/{id}", "ZenTao Execution Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI template variables (MCP library handles this)
-			id := ""
-			if idVal, ok := request.Params.Arguments["id"]; ok {
-				if idStr, ok := idVal.(string); ok {
-					id = idStr
-				}
-			}
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "execution")
 
 			if id == "" {
-				return nil, fmt.Errorf("execution ID not found in URI template")
+				return nil, fmt.Errorf("execution ID not found in URI: %s", uri)
 			}
 
 			resp, err := client.Get(fmt.Sprintf("/executions/%s", id))
@@ -230,7 +210,8 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 					URI:      request.Params.URI,
 					MIMEType: "application/json",
 					Text:     string(resp),
-			},
-		}, nil
-	})
+				},
+			}, nil
+		},
+	)
 }
