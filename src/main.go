@@ -35,11 +35,7 @@ func main() {
 	code := os.Getenv("ZENTAO_APP_CODE")
 	key := os.Getenv("ZENTAO_APP_KEY")
 
-	if code != "" && key != "" {
-		ztClient = client.NewZenTaoClientWithApp(baseURL, code, key)
-	} else {
-		ztClient = client.NewZenTaoClient(baseURL)
-	}
+	ztClient = client.NewZenTaoClientWithApp(baseURL, code, key)
 
 	s := server.NewMCPServer(
 		"ZenTao MCP Server",

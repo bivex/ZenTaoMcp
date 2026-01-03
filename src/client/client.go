@@ -58,50 +58,6 @@ func (c *ZenTaoClient) SetAppCredentials(code, key string) {
 	c.Key = key
 }
 
-func (c *ZenTaoClient) GetToken(account, password string) (string, error) {
-	type TokenRequest struct {
-		Account  string `json:"account"`
-		Password string `json:"password"`
-	}
-
-	reqBody := TokenRequest{
-		Account:  account,
-		Password: password,
-	}
-
-	jsonBody, err := json.Marshal(reqBody)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	resp, err := c.Client.Post(
-		fmt.Sprintf("%s/tokens", c.BaseURL),
-		"application/json",
-		bytes.NewBuffer(jsonBody),
-	)
-	if err != nil {
-		return "", fmt.Errorf("failed to get token: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		return "", fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	if token, ok := result["token"].(string); ok {
-		c.Token = token
-		return token, nil
-	}
-
-	return "", fmt.Errorf("token not found in response")
-}
-
 func (c *ZenTaoClient) generateToken(timestamp int64) string {
 	tokenString := c.Code + c.Key + strconv.FormatInt(timestamp, 10)
 	hash := md5.Sum([]byte(tokenString))
@@ -122,10 +78,11 @@ func (c *ZenTaoClient) getTimestamp() int64 {
 
 // convertRESTPath converts REST-style paths to ZenTao query parameter format
 // Examples:
-//   /products -> ?m=product&f=browse
-//   /products/123 -> ?m=product&f=view&id=123
-//   /product/123 (PUT) -> ?m=product&f=edit&id=123
-//   /projects/123/executions -> ?m=execution&f=browse&project=123
+//
+//	/products -> ?m=product&f=browse
+//	/products/123 -> ?m=product&f=view&id=123
+//	/product/123 (PUT) -> ?m=product&f=edit&id=123
+//	/projects/123/executions -> ?m=execution&f=browse&project=123
 func (c *ZenTaoClient) convertRESTPath(method, path string) (string, map[string]string) {
 	params := make(map[string]string)
 
