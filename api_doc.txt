@@ -1,1575 +1,1575 @@
-# ZenTao API Documentation
-
-Total APIs: 82
-
-## API Endpoints
-
-### POST /tokens - Get Token
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| account | string | No | 登录名 |
-| password | string | No | 密码 |
-
-**Request Example:**
-
-```json
-{&quot;account&quot;: &quot;admin&quot;, &quot;password&quot;: &quot;123456&quot;}
-```
-
----
-
-### GET /feedbacks - Get Feedback List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Query Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| solution | No | 反馈处理结果（unclosed 未关闭 | all 全部 | public公开 | tostory 转任务 | totask 转任务 | tobug 转Bug | totodo 转代办 | review 待评审 | assigntome 指派给我） |
-| orderBy | No | 排序，默认id_desc；排序字段+下划线+asc/desc |
-| page | No | 第几页，默认为1 |
-| limit | No | 每页反馈数量，默认20 |
-
----
-
-### GET /programs - Get Program List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 访问凭证Token |
-
-**Query Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| order | No | 排序，默认order_asc；排序字段+下划线+asc/desc |
-
----
-
-### POST /products - Create Product
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | Yes | 产品名称 |
-| program | int | No | 所属项目集 |
-| code | int | Yes | 产品代号 |
-| line | int | No | 所属产品线 |
-| PO | 1 | No | 产品负责人 |
-| QD | 1 | No | 测试负责人 |
-| RD | 1 | No | 发布负责人 |
-| type | string | No | 产品类型(normal 正常 | branch 多分支 | ) |
-| desc | string | No | 产品描述 |
-| acl | string | No | 访问控制（open 公开 | private 私有） |
-| whitelist | array | No | 白名单 |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;测试产品&quot;,
-    &quot;code&quot;: &quot;test&quot;,
-    &quot;program&quot;: 1
-}
-```
-
----
-
-### GET /products - Get Product List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | No | 认证凭证Token |
-
----
-
-### GET /products/:id - Get Product Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /product/:id - Edit Product
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | No | 访问凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | No | 产品名称 |
-| code | string | No | 产品代号 |
-| type | string | No | 产品类型(normal 正常 | branch 多分支 | platform 多平台) |
-| line | int | No | 所属产品线 |
-| program | int | No | 所属项目集 |
-| status | string | No | 产品状态(normal 正常 | closed 已关闭) |
-| desc | string | No | 产品描述，富文本 |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;公司企业网站建设1&quot;
-}
-```
-
----
-
-### POST /projects - Create Project
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | Yes | 项目名称 |
-| begin | date | Yes | 计划开始日期 |
-| end | date | Yes | 计划结束日期 |
-| products | array | Yes | 关联产品，比如 [1, 2]，不能为空。 |
-| code | string | Yes | 项目编号 |
-| model | string | No | 项目模型，默认为scrum |
-| parent | int | No | 所属项目集，默认为0 |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;test&quot;,
-    &quot;code&quot;: &quot;test&quot;,
-    &quot;begin&quot;: &quot;2021-01-01&quot;,
-    &quot;end&quot;: &quot;2022-01-01&quot;,
-    &quot;products&quot;: [1]
-}
-```
-
----
-
-### DELETE /product/:id - Delete Product
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /projects - Get Project List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Query Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| page | No | 第几页，默认为1 |
-| limit | No | 每页项目数量，默认20 |
-
----
-
-### GET /projects/:id - Get Project Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /programs/:id - Update Program
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | No | 项目名称 |
-| parent | string | No | 父项目集，0表示没有父项目集 |
-| PM | string | No | 项目负责人 |
-| budget | int | No | 预算金额 |
-| budgetUnit | string | No | 预算币种(CNY | USD) |
-| desc | string | No | 项目集描述 |
-| begin | date | No | 预计开始日期 |
-| end | date | No | 预计结束日期 |
-| acl | string | No | 访问控制(open 公开 | private 私有) |
-| whitelist | array | No | 白名单 |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;项目集&quot;,
-    &quot;PM&quot;: &quot;admin&quot;
-}
-```
-
----
-
-### GET /projects/:id/executions - Get Project Execution List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /projects/:id - Update Project
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | No | 项目名称 |
-| code | string | No | 项目代号 |
-| parent | int | No | 所属项目集 |
-| PM | int | No | 项目负责人 |
-| budget | int | No | 项目预算金额 |
-| budgetUnit | string | No | 预算币种(CNY | USD) |
-| days | int | No | 可用工作日 |
-| desc | string | No | 项目描述 |
-| acl | string | No | 访问控制(open 公开 | private 私有) |
-| whitelist | array | No | 白名单 |
-| auth | string | No | 权限控制(extend 继承 | reset 重新定义) |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;修改项目&quot;,
-    &quot;PM&quot;: &quot;admin&quot;
-}
-```
-
----
-
-### DELETE /projects/:id - Delete Project
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /projects/:id/executions - Create Execution
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证 |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| project | int | Yes | 所属项目 |
-| name | string | Yes | 执行名称 |
-| code | string | Yes | 执行代号 |
-| begin | date | Yes | 计划开始日期 |
-| end | date | Yes | 计划结束日期 |
-| days | int | No | 可用工作日 |
-| lifetime | string | No | 类型(short 短期 | long 长期 | ops 运维) |
-| PO | string | No | 产品负责人 |
-| PM | string | No | 迭代负责人 |
-| QD | string | No | 测试负责人 |
-| RD | string | No | 发布负责人 |
-| teamMembers | array | No | 团队成员 ["admin"] |
-| desc | string | No | 迭代描述 |
-| acl | string | No | 访问控制(private 私有 | open 继承项目权限) |
-| whitelist | array | No | 白名单 |
-
-**Request Example:**
-
-```json
-{&quot;name&quot;: &quot;测试执行1&quot;, &quot;code&quot;: &quot;test1&quot;, &quot;begin&quot;: &quot;2021-12-01&quot;, &quot;end&quot;: &quot;2021-12-11&quot;, &quot;days&quot;: 10}
-```
-
----
-
-### GET /programs/:id - Get Program Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### DELETE /programs/:id - Delete Program
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /programs - Create Program
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | No | 项目名称 |
-| parent | string | No | 父项目集，0表示没有父项目集 |
-| PM | string | No | 项目负责人 |
-| budget | int | No | 预算金额 |
-| budgetUnit | string | No | 预算币种(CNY | USD) |
-| desc | string | No | 项目集描述 |
-| begin | date | No | 预计开始日期 |
-| end | date | No | 预计结束日期 |
-| acl | string | No | 访问控制(open 公开 | private 私有) |
-| whitelist | array | No | 白名单，只有acl = private才生效 |
-
----
-
-### GET /projects/:id/stories - Get Project Story List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /executions/:id - Update Execution
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证 |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| project | int | Yes | 所属项目 |
-| name | string | Yes | 执行名称 |
-| code | string | Yes | 执行代号 |
-| begin | date | Yes | 计划开始日期 |
-| end | date | Yes | 计划结束日期 |
-| days | int | No | 可用工作日 |
-| lifetime | string | No | 类型(short 短期 | long 长期 | ops 运维) |
-| PO | string | No | 产品负责人 |
-| PM | string | No | 迭代负责人 |
-| QD | string | No | 测试负责人 |
-| RD | string | No | 发布负责人 |
-| teamMembers | array | No | 团队成员 ["admin"] |
-| desc | string | No | 迭代描述 |
-| acl | string | No | 访问控制(private 私有 | open 继承项目权限) |
-| whitelist | array | No | 白名单 |
-
-**Request Example:**
-
-```json
-{&quot;name&quot;: &quot;测试执行1&quot;, &quot;code&quot;: &quot;test1&quot;, &quot;begin&quot;: &quot;2021-12-01&quot;, &quot;end&quot;: &quot;2021-12-11&quot;, &quot;days&quot;: 10}
-```
-
----
-
-### POST /stories/:id/change - Change Story
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| title | string | No | 需求标题 |
-| spec | string | No | 需求描述 |
-| verify | string | No | 验收标准 |
-
-**Request Example:**
-
-```json
-{
-    &quot;spec&quot;: &quot;变更描述&quot;
-}
-```
-
----
-
-### GET /executions/:id - Get Execution Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### DELETE /executions/:id - Delete Execution
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /products/:id/stories - Get Product Story List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /stories - Create Story
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| title | string | Yes | 需求标题 |
-| product | int | Yes | 所属产品 |
-| pri | int | Yes | 优先级 |
-| category | string | Yes | 需求类型 |
-| spec | string | No | 需求描述 |
-| verify | string | No | 验收标准 |
-| source | string | No | 需求来源 |
-| sourceNote | string | No | 来源备注 |
-| estimate | float | No | 预计工时 |
-| keywords | string | No | 关键词 |
-
-**Request Example:**
-
-```json
-{
-    &quot;title&quot;: &quot;测试需求&quot;,
-    &quot;spec&quot;: &quot;测试&quot;,
-    &quot;product&quot;: 1,
-    &quot;pri&quot;: 1,
-    &quot;category&quot;: &quot;feature&quot;
-}
-```
-
----
-
-### GET /executions/:id/stories - Get Execution Story List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /stories/:id - Get Story Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### DELETE /stories/:id - Delete Story
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /executions/:id/tasks - Get Execution Task List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /stories/:id - Update Story Fields
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| module | int | No | 所属模块 |
-| source | string | No | 来源 |
-| sourceNote | string | No | 来源备注 |
-| pri | int | No | 优先级 |
-| category | string | No | 类型(feature 功能 | interface 接口 | performance 性能 | safe 安全 | experience 体验 | improve 改进 | other 其他) |
-| estimate | float | No | 预计工时 |
-| keywords | string | No | 关键词 |
-
-**Request Example:**
-
-```json
-{
-    &quot;category&quot;: &quot;other&quot;
-}
-```
-
----
-
-### GET /tasks/:id - Get Task Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /executions/:id/tasks - Create Task
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| module | int | No | 所属模块 |
-| story | int | No | 关联需求 |
-| fromBug | int | No | 来自于Bug |
-| name | string | Yes | 任务名称 |
-| type | string | Yes | 任务类型(design 设计 | devel 开发 | request 需求 | test 测试 | study 研究 | discuss 讨论 | ui 界面 | affair 事务 | misc 其他) |
-| assignedTo | array | Yes | 指派给 |
-| pri | int | No | 优先级 |
-| estimate | float | No | 预计工时 |
-| estStarted | date | Yes | 预计开始日期 |
-| deadline | date | Yes | 预计结束日期 |
-| openedBy | 1 | Yes | 创建人 |
-| openedDate | datetime | Yes | 创建时间 |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;testtt&quot;,
-    &quot;assignedTo&quot;: [ &quot;admin&quot; ],
-    &quot;type&quot;: &quot;devel&quot;,
-    &quot;estStarted&quot;: &quot;2021-12-01&quot;,
-    &quot;deadline&quot;: &quot;2021-12-31&quot;
-}
-```
-
----
-
-### DELETE /tasks/:id - Delete Task
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /products/:id/bugs - Get Product Bug List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /tasks/:id - Update Task
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| module | int | No | 所属模块 |
-| story | int | No | 关联需求 |
-| fromBug | int | No | 来自于Bug |
-| name | string | No | 任务名称 |
-| type | string | No | 任务类型(design 设计 | devel 开发 | request 需求 | test 测试 | study 研究 | discuss 讨论 | ui 界面 | affair 事务 | misc 其他) |
-| assignedTo | array | No | 指派给，["admin"] |
-| pri | int | No | 优先级 |
-| estimate | float | No | 预计工时 |
-| estStarted | date | No | 预计开始日期 |
-| deadline | date | No | 预计结束日期 |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;testtt&quot;,
-    &quot;assignedTo&quot;: [ &quot;admin&quot; ],
-    &quot;type&quot;: &quot;devel&quot;,
-    &quot;estStarted&quot;: &quot;2021-12-01&quot;,
-    &quot;deadline&quot;: &quot;2021-12-31&quot;
-}
-```
-
----
-
-### POST /products/:id/bugs - Create Bug
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| branch | int | No | 所属分支 |
-| module | int | No | 所属模块 |
-| execution | int | No | 所属执行 |
-| title | string | Yes | Bug标题 |
-| keywords | string | No | 关键词 |
-| severity | int | Yes | 严重程度 |
-| pri | int | Yes | 优先级 |
-| type | string | Yes | Bug类型(codeerror 代码错误 | config 配置相关 | install 安装部署 | security 安全相关 | performance 性能问题 | standard 标准规范 | automation |测试脚本 | designdefect 设计缺陷 | others 其他) |
-| os | string | No | 操作系统 |
-| browser | string | No | 浏览器 |
-| steps | string | No | 重现步骤 |
-| task | int | No | 相关任务 |
-| story | int | No | 相关需求 |
-| deadline | date | No | 截止日期 |
-| openedBuild | array | No | 影响版本 |
-
-**Request Example:**
-
-```json
-{
-    &quot;title&quot;: &quot;Bug2&quot;,
-    &quot;severity&quot;: 1,
-    &quot;pri&quot;: 1,
-    &quot;steps&quot;: &quot;&quot;,
-    &quot;type&quot;: &quot;codeerror&quot;,
-    &quot;openedBuild&quot;: [
-        &quot;trunk&quot;
-    ]
-}
-```
-
----
-
-### PUT /bugs/:id - Update Bug
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| branch | int | No | 所属分支 |
-| module | int | No | 所属模块 |
-| execution | int | No | 所属执行 |
-| title | string | Yes | Bug标题 |
-| keywords | string | No | 关键词 |
-| severity | int | Yes | 严重程度 |
-| pri | int | Yes | 优先级 |
-| type | string | Yes | Bug类型(codeerror 代码错误 | config 配置相关 | install 安装部署 | security 安全相关 | performance 性能问题 | standard 标准规范 | automation |测试脚本 | designdefect 设计缺陷 | others 其他) |
-| os | string | No | 操作系统 |
-| browser | string | No | 浏览器 |
-| steps | string | No | 重现步骤 |
-| task | int | No | 相关任务 |
-| story | int | No | 相关需求 |
-| deadline | date | No | 截止日期 |
-| openedBuild | array | No | 影响版本 |
-
-**Request Example:**
-
-```json
-{
-    &quot;title&quot;: &quot;Bug2&quot;,
-    &quot;severity&quot;: 1,
-    &quot;pri&quot;: 1,
-    &quot;steps&quot;: &quot;&quot;,
-    &quot;type&quot;: &quot;codeerror&quot;,
-    &quot;openedBuild&quot;: [
-        &quot;trunk&quot;
-    ]
-}
-```
-
----
-
-### GET /bugs/:id - Get Bug Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### DELETE /bugs/:id - Delete Bug
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /products/:id/testcases - Get Product Test Case List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /products/:id/testcases - Create Test Case
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| branch | int | No | 所属分支 |
-| module | int | No | 所属模块 |
-| story | int | No | 所属需求 |
-| title | string | Yes | 用例标题 |
-| type | string | Yes | 用例类型(feature 功能测试 | performance 性能测试 | config 配置相关 | install 安装部署 | security 安全相关 | interface 接口测试 | unit 单元测试 | other 其他) |
-| stage | string | No | 适用阶段(unittest 单元测试阶段 | feature 功能测试阶段 | intergrate 集成测试阶段 | system 系统测试阶段 | smoke 冒烟测试阶段 | bvt 版本验证阶段) |
-| precondition | string | No | 前置条件 |
-| pri | int | No | 优先级 |
-| steps | array | Yes | 用例步骤 |
-| keywords | string | No | 关键词 |
-
-**Request Example:**
-
-```json
-{
-    &quot;title&quot;: &quot;case1&quot;,
-    &quot;pri&quot;: 1,
-    &quot;steps&quot;: [
-        {
-            &quot;desc&quot;: &quot;步骤1&quot;,
-            &quot;expect&quot;: &quot;结果1&quot;
-        }
-    ],
-    &quot;type&quot;: &quot;feature&quot;
-}
-```
-
----
-
-### POST /products/:id/plans - Create Plan
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| branch | int | No | 所属分支 |
-| title | string | Yes | 计划名称 |
-| begin | date | No | 计划开始日期 |
-| end | date | No | 计划结束日期 |
-| desc | string | No | 计划描述 |
-| parent | int | No | 所属父计划 |
-
----
-
-### GET /testcases/:id - Get Test Case Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /testcases/:id - Update Test Case
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| branch | int | No | 所属分支 |
-| module | int | No | 所属模块 |
-| story | int | No | 所属需求 |
-| title | string | No | 用例标题 |
-| type | string | No | 用例类型(feature 功能测试 | performance 性能测试 | config 配置相关 | install 安装部署 | security 安全相关 | interface 接口测试 | unit 单元测试 | other 其他) |
-| stage | string | No | 适用阶段(unittest 单元测试阶段 | feature 功能测试阶段 | intergrate 集成测试阶段 | system 系统测试阶段 | smoke 冒烟测试阶段 | bvt 版本验证阶段) |
-| precondition | string | No | 前置条件 |
-| pri | int | No | 优先级 |
-| steps | array | No | 用例步骤 |
-| keywords | string | No | 关键词 |
-
-**Request Example:**
-
-```json
-{
-    &quot;title&quot;: &quot;case1&quot;,
-    &quot;pri&quot;: 1,
-    &quot;steps&quot;: [
-        {
-            &quot;desc&quot;: &quot;步骤1&quot;,
-            &quot;expect&quot;: &quot;结果1&quot;
-        }
-    ],
-    &quot;type&quot;: &quot;feature&quot;
-}
-```
-
----
-
-### DELETE /testcases/:id - Delete Test Case
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /products/:id/plans - Get Product Plan List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /productplans/:id - Get Plan Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /productplans/:id - Update Plan
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| branch | int | No | 所属分支 |
-| title | string | Yes | 计划名称 |
-| begin | date | No | 计划开始日期 |
-| end | date | No | 计划结束日期 |
-| desc | string | No | 计划描述 |
-
----
-
-### DELETE /productsplan/:id - Delete Plan
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /productplans/:id/linkstories - Link Stories to Product Plan
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| stories | array | No | 新增关联的需求，比如 [1, 2] |
-
-**Request Example:**
-
-```json
-{
-    &quot;stories&quot;: [ 11 ]
-}
-```
-
----
-
-### POST /productplans/:id/unlinkstories - Unlink Stories from Product Plan
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| stories | array | Yes | 取消关联的需求ID，比如 [1, 2] |
-
-**Request Example:**
-
-```json
-{
-    &quot;stories&quot;: [11]
-}
-```
-
----
-
-### POST /products/:id/linkBugs - Link Bugs to Product Plan
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| bugs | array | Yes | 关联的Bug ID，比如 [1, 2] |
-
-**Request Example:**
-
-```json
-{
-    &quot;bugs&quot;: [7]
-}
-```
-
----
-
-### POST /productplans/:id/unlinkbugs - Unlink Bugs from Product Plan
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| bugs | array | Yes | 取消关联的Bug ID，比如 [1, 2] |
-
-**Request Example:**
-
-```json
-{
-    &quot;bugs&quot;: [7]
-}
-```
-
----
-
-### GET /projects/:id/builds - Get Project Build List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /executions/:id/builds - Get Execution Build List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /builds/:id - Update Build
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /projects/:id/builds - Create Build
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| execution | int | Yes | 所属执行 |
-| product | int | Yes | 所属产品 |
-| branch | int | No | 所属分支 |
-| name | string | Yes | 版本名称 |
-| builder | string | Yes | 构建者 |
-| date | date | No | 打包日期 |
-| scmPath | string | No | 源代码地址 |
-| filePath | string | No | 下载地址 |
-| desc | string | No | 版本描述 |
-
-**Request Example:**
-
-```json
-{
-    &quot;name&quot;: &quot;test&quot;,
-    &quot;product&quot;: 4,
-    &quot;date&quot;: &quot;2021-01-01&quot;,
-    &quot;execution&quot;: 42,
-    &quot;builder&quot;: &quot;admin&quot;
-}
-```
-
----
-
-### GET /builds/:id - Get Build Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### DELETE /builds/:id - Delete Build
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /testtasks - Get Test Task List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Query Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| page | No | 当前页数，默认为1 |
-| limit | No | 每页测试单数，默认20个 |
-| order | No | 排序，默认 id_desc 按照id倒序 |
-| product | No | 所属产品 |
-| branch | No | 所属分支 |
-
----
-
-### GET /projects/:id/testtasks - Get Project Test Tasks
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /users/:id - Get User Info
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /projects/:id/releases - Get Project Release List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /user - Get My Profile
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /testtasks/:id - Get Test Task Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### GET /products/:id/releases - Get Product Release List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### DELETE /users/:id - Delete User
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /users - Create User
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| account | string | Yes | 账号 |
-| password | string | Yes | 密码 |
-| realname | string | No | 真实姓名 |
-| visions | array | No | 界面 [“rnd”, “lite”]，(研发综合界面 rnd, 运营管理界面 lite)。默认是rnd |
-
-**Request Example:**
-
-```json
-{&quot;account&quot;: &quot;usertest&quot;, &quot;password&quot;: &quot;123qwe!@#&quot;, &quot;realname&quot;: &quot;测试用户&quot;}
-```
-
----
-
-### PUT /users/:id - Update User Info
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证 |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| dept | int | No | 所属部门 |
-| role | string | No | 角色 |
-| mobile | string | No | 手机号 |
-| realname | string | No | 真实姓名 |
-| email | string | No | 邮箱 |
-| phone | string | No | 电话号码 |
-
-**Request Example:**
-
-```json
-{
-    &quot;realname&quot;: &quot;管理员&quot;
-}
-```
-
----
-
-### GET /users - Get User List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Query Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| page | Yes | 当前页数 |
-| limit | Yes | 每页用户数 |
-
----
-
-### GET /feedbacks/:id - Get Feedback Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /feedbacks/:id - Update Feedback
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| product | int | No | 所属产品 |
-| module | int | No | 所属分类 |
-| title | string | No | 标题 |
-| type | string | No | 类型(story 需求 | task 任务 | bug Bug | todo 代办 | advice 建议) 全新项目集模式还有（issue 问题 | risk 风险 | opportunity 机会） |
-| desc | string | No | 描述 |
-| public | int | No | 公开 |
-| notify | int | No | 通知 |
-| notifyEmail | string | No | 通知邮箱 |
-| feedbackBy | string | No | 反馈者 |
-
-**Request Example:**
-
-```json
-{
-    &quot;title&quot;: &quot;test&quot;,
-    &quot;desc&quot;: &quot;edit test&quot;
-}
-```
-
----
-
-### DELETE /feedbacks/:id - Delete Feedback
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### POST /feedbacks/:id/assign - Assign Feedback
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| assignedTo | string | No | 指派给，填写用户的account字段 |
-| comment | string | No | 备注 |
-| mailto | string | No | 抄送给，填写用户的account字段并用“,”分开 |
-
-**Request Example:**
-
-```json
-{
-    &quot;assignedTo&quot;: &quot;admin&quot;,
-    &quot;comment&quot;:&quot;yes&quot;
-}
-```
-
----
-
-### POST /feedbacks/:id/close - Close Feedback
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| closedReason | string | No | 关闭原因（commented 已处理 | repeat 重复 | refuse 不予采纳） |
-| comment | string | No | 备注 |
-
-**Request Example:**
-
-```json
-{
-    &quot;closedReason&quot;:&quot;repeat&quot;
-}
-```
-
----
-
-### POST /feedbacks - Create Feedback
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| product | int | Yes | 所属产品 |
-| module | int | No | 所属分类 |
-| title | string | Yes | 标题 |
-| type | string | No | 类型(story 需求 | task 任务 | bug Bug | todo 代办 | advice 建议) 全新项目集模式还有（issue 问题 | risk 风险 | opportunity 机会） |
-| desc | string | No | 描述 |
-| public | int | No | 公开 |
-| notify | int | No | 通知 |
-| notifyEmail | string | No | 通知邮箱 |
-| feedbackBy | string | No | 反馈者 |
-
-**Request Example:**
-
-```json
-{
-    &quot;product&quot;: 2,
-    &quot;title&quot;:&quot;create test feedback&quot;
-}
-```
-
----
-
-### GET /tickets - Get Ticket List
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Query Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| browseType | No | 工单状态（all 所有 | wait 待处理 | doing 处理中 | done 待关闭 | finishedbyme 由我解决 | openedbyme 由我创建 | assignedtome 指派给我） |
-| param | No | 模块ID， 默认为0 |
-| orderBy | No | 排序，默认id_desc；排序字段+下划线+asc/desc |
-| page | No | 第几页，默认为1 |
-| limit | No | 每页工单数量，默认20 |
-
----
-
-### GET /tickets/:id - Get Ticket Details
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
-### PUT /tickets/:id - Update Ticket
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| product | int | Yes | 所属产品ID |
-| module | int | Yes | 所属模块ID |
-| title | string | Yes | 工单名称 |
-| type | string | No | 工单类型(code 程序报错 | data 数据错误 | stuck 流程卡断 | security 安全问题 | affair 事务) |
-| desc | string | No | 工单描述 |
-
-**Request Example:**
-
-```json
-{
-    &quot;title&quot;: &quot;test&quot;,
-    &quot;desc&quot;: &quot;edit test&quot;
-}
-```
-
----
-
-### POST /tickets - Create Ticket
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
-**Query Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| product | Yes | 所属产品ID |
-| module | Yes | 所属模块ID |
-| title | Yes | 工单名称 |
-| type | No | 工单类型(code 程序报错 | data 数据错误 | stuck 流程卡断 | security 安全问题 | affair 事务) |
-
-**Body Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| product | int | Yes | 所属产品ID |
-| module | int | Yes | 所属模块ID |
-| title | string | Yes | 工单名称 |
-| type | string | Yes | 工单类型 |
-
-**Request Example:**
-
-```json
-{
-    &quot;product&quot;: 2,
-    &quot;module&quot;:2,
-    &quot;title&quot;:&quot;create test ticket&quot;
-}
-```
-
----
-
-### DELETE /tickets/:id - Delete Ticket
-
-**Headers:**
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| Token | Yes | 认证凭证Token |
-
----
-
+00001| # ZenTao API Documentation
+00002| 
+00003| Total APIs: 82
+00004| 
+00005| ## API Endpoints
+00006| 
+00007| ### POST /tokens - Get Token
+00008| 
+00009| **Body Parameters:**
+00010| 
+00011| | Parameter | Type | Required | Description |
+00012| |-----------|------|----------|-------------|
+00013| | account | string | No | Login name |
+00014| | password | string | No | Password |
+00015| 
+00016| **Request Example:**
+00017| 
+00018| ```json
+00019| {&quot;account&quot;: &quot;admin&quot;, &quot;password&quot;: &quot;123456&quot;}
+00020| ```
+00021| 
+00022| ---
+00023| 
+00024| ### GET /feedbacks - Get Feedback List
+00025| 
+00026| **Headers:**
+00027| 
+00028| | Header | Required | Description |
+00029| |--------|----------|-------------|
+00030| | Token | Yes | Authentication token |
+00031| 
+00032| **Query Parameters:**
+00033| 
+00034| | Parameter | Required | Description |
+00035| |-----------|----------|-------------|
+00036| | solution | No | Feedback processing result (unclosed | all | public | tostory convert to story | totask convert to task | tobug convert to bug | totodo convert to todo | review pending review | assigntome assigned to me) |
+00037| | orderBy | No | Sort order, default id_desc; sort field + underscore + asc/desc |
+00038| | page | No | Page number, default is 1 |
+00039| | limit | No | Number of feedback per page, default 20 |
+00040| 
+00041| ---
+00042| 
+00043| ### GET /programs - Get Program List
+00044| 
+00045| **Headers:**
+00046| 
+00047| | Header | Required | Description |
+00048| |--------|----------|-------------|
+00049| | Token | Yes | Access token |
+00050| 
+00051| **Query Parameters:**
+00052| 
+00053| | Parameter | Required | Description |
+00054| |-----------|----------|-------------|
+00055| | order | No | Sort order, default order_asc; sort field + underscore + asc/desc |
+00056| 
+00057| ---
+00058| 
+00059| ### POST /products - Create Product
+00060| 
+00061| **Headers:**
+00062| 
+00063| | Header | Required | Description |
+00064| |--------|----------|-------------|
+00065| | Token | Yes | Authentication token |
+00066| 
+00067| **Body Parameters:**
+00068| 
+00069| | Parameter | Type | Required | Description |
+00070| |-----------|------|----------|-------------|
+00071| | name | string | Yes | Product name |
+00072| | program | int | No | Program |
+00073| | code | int | Yes | Product code |
+00074| | line | int | No | Product line |
+00075| | PO | 1 | No | Product Owner |
+00076| | QD | 1 | No | Quality Director |
+00077| | RD | 1 | No | Release Director |
+00078| | type | string | No | Product type (normal | branch) |
+00079| | desc | string | No | Product description |
+00080| | acl | string | No | Access control (open public | private private) |
+00081| | whitelist | array | No | Whitelist |
+00082| 
+00083| **Request Example:**
+00084| 
+00085| ```json
+00086| {
+00087|     &quot;name&quot;: &quot;测试产品&quot;,
+00088|     &quot;code&quot;: &quot;test&quot;,
+00089|     &quot;program&quot;: 1
+00090| }
+00091| ```
+00092| 
+00093| ---
+00094| 
+00095| ### GET /products - Get Product List
+00096| 
+00097| **Headers:**
+00098| 
+00099| | Header | Required | Description |
+00100| |--------|----------|-------------|
+00101| | Token | No | Authentication token |
+00102| 
+00103| ---
+00104| 
+00105| ### GET /products/:id - Get Product Details
+00106| 
+00107| **Headers:**
+00108| 
+00109| | Header | Required | Description |
+00110| |--------|----------|-------------|
+00111| | Token | Yes | Authentication token |
+00112| 
+00113| ---
+00114| 
+00115| ### PUT /product/:id - Edit Product
+00116| 
+00117| **Headers:**
+00118| 
+00119| | Header | Required | Description |
+00120| |--------|----------|-------------|
+00121| | Token | No | Access token |
+00122| 
+00123| **Body Parameters:**
+00124| 
+00125| | Parameter | Type | Required | Description |
+00126| |-----------|------|----------|-------------|
+00127| | name | string | No | Product name |
+00128| | code | string | No | Product code |
+00129| | type | string | No | Product type (normal | branch | platform) |
+00130| | line | int | No | Product line |
+00131| | program | int | No | Program |
+00132| | status | string | No | Product status (normal | closed) |
+00133| | desc | string | No | Product description, rich text |
+00134| 
+00135| **Request Example:**
+00136| 
+00137| ```json
+00138| {
+00139|     &quot;name&quot;: &quot;公司企业网站建设1&quot;
+00140| }
+00141| ```
+00142| 
+00143| ---
+00144| 
+00145| ### POST /projects - Create Project
+00146| 
+00147| **Headers:**
+00148| 
+00149| | Header | Required | Description |
+00150| |--------|----------|-------------|
+00151| | Token | Yes | Authentication token |
+00152| 
+00153| **Body Parameters:**
+00154| 
+00155| | Parameter | Type | Required | Description |
+00156| |-----------|------|----------|-------------|
+00157| | name | string | Yes | Project name |
+00158| | begin | date | Yes | Planned start date |
+00159| | end | date | Yes | Planned end date |
+00160| | products | array | Yes | Associated products, e.g. [1, 2], cannot be empty |
+00161| | code | string | Yes | Project code |
+00162| | model | string | No | Project model, default is scrum |
+00163| | parent | int | No | Parent program, default is 0 |
+00164| 
+00165| **Request Example:**
+00166| 
+00167| ```json
+00168| {
+00169|     &quot;name&quot;: &quot;test&quot;,
+00170|     &quot;code&quot;: &quot;test&quot;,
+00171|     &quot;begin&quot;: &quot;2021-01-01&quot;,
+00172|     &quot;end&quot;: &quot;2022-01-01&quot;,
+00173|     &quot;products&quot;: [1]
+00174| }
+00175| ```
+00176| 
+00177| ---
+00178| 
+00179| ### DELETE /product/:id - Delete Product
+00180| 
+00181| **Headers:**
+00182| 
+00183| | Header | Required | Description |
+00184| |--------|----------|-------------|
+00185| | Token | Yes | Authentication token |
+00186| 
+00187| ---
+00188| 
+00189| ### GET /projects - Get Project List
+00190| 
+00191| **Headers:**
+00192| 
+00193| | Header | Required | Description |
+00194| |--------|----------|-------------|
+00195| | Token | Yes | Authentication token |
+00196| 
+00197| **Query Parameters:**
+00198| 
+00199| | Parameter | Required | Description |
+00200| |-----------|----------|-------------|
+00201| | page | No | Page number, default is 1 |
+00202| | limit | No | Number of projects per page, default 20 |
+00203| 
+00204| ---
+00205| 
+00206| ### GET /projects/:id - Get Project Details
+00207| 
+00208| **Headers:**
+00209| 
+00210| | Header | Required | Description |
+00211| |--------|----------|-------------|
+00212| | Token | Yes | Authentication token |
+00213| 
+00214| ---
+00215| 
+00216| ### PUT /programs/:id - Update Program
+00217| 
+00218| **Headers:**
+00219| 
+00220| | Header | Required | Description |
+00221| |--------|----------|-------------|
+00222| | Token | Yes | Authentication token |
+00223| 
+00224| **Body Parameters:**
+00225| 
+00226| | Parameter | Type | Required | Description |
+00227| |-----------|------|----------|-------------|
+00228| | name | string | No | Project name |
+00229| | parent | string | No | Parent program, 0 means no parent program |
+00230| | PM | string | No | Project Manager |
+00231| | budget | int | No | Budget amount |
+00232| | budgetUnit | string | No | Budget currency (CNY | USD) |
+00233| | desc | string | No | Program description |
+00234| | begin | date | No | Estimated start date |
+00235| | end | date | No | Estimated end date |
+00236| | acl | string | No | Access control (open | private) |
+00237| | whitelist | array | No | Whitelist |
+00238| 
+00239| **Request Example:**
+00240| 
+00241| ```json
+00242| {
+00243|     &quot;name&quot;: &quot;项目集&quot;,
+00244|     &quot;PM&quot;: &quot;admin&quot;
+00245| }
+00246| ```
+00247| 
+00248| ---
+00249| 
+00250| ### GET /projects/:id/executions - Get Project Execution List
+00251| 
+00252| **Headers:**
+00253| 
+00254| | Header | Required | Description |
+00255| |--------|----------|-------------|
+00256| | Token | Yes | Authentication token |
+00257| 
+00258| ---
+00259| 
+00260| ### PUT /projects/:id - Update Project
+00261| 
+00262| **Headers:**
+00263| 
+00264| | Header | Required | Description |
+00265| |--------|----------|-------------|
+00266| | Token | Yes | Authentication token |
+00267| 
+00268| **Body Parameters:**
+00269| 
+00270| | Parameter | Type | Required | Description |
+00271| |-----------|------|----------|-------------|
+00272| | name | string | No | Project name |
+00273| | code | string | No | Project code |
+00274| | parent | int | No | Parent program |
+00275| | PM | int | No | Project Manager |
+00276| | budget | int | No | Project budget amount |
+00277| | budgetUnit | string | No | Budget currency (CNY | USD) |
+00278| | days | int | No | Available workdays |
+00279| | desc | string | No | Project description |
+00280| | acl | string | No | Access control (open | private) |
+00281| | whitelist | array | No | Whitelist |
+00282| | auth | string | No | Permission control (extend inherit | reset redefine) |
+00283| 
+00284| **Request Example:**
+00285| 
+00286| ```json
+00287| {
+00288|     &quot;name&quot;: &quot;修改项目&quot;,
+00289|     &quot;PM&quot;: &quot;admin&quot;
+00290| }
+00291| ```
+00292| 
+00293| ---
+00294| 
+00295| ### DELETE /projects/:id - Delete Project
+00296| 
+00297| **Headers:**
+00298| 
+00299| | Header | Required | Description |
+00300| |--------|----------|-------------|
+00301| | Token | Yes | Authentication token |
+00302| 
+00303| ---
+00304| 
+00305| ### POST /projects/:id/executions - Create Execution
+00306| 
+00307| **Headers:**
+00308| 
+00309| | Header | Required | Description |
+00310| |--------|----------|-------------|
+00311| | Token | Yes | Authentication token |
+00312| 
+00313| **Body Parameters:**
+00314| 
+00315| | Parameter | Type | Required | Description |
+00316| |-----------|------|----------|-------------|
+00317| | project | int | Yes | Parent project |
+00318| | name | string | Yes | Execution name |
+00319| | code | string | Yes | Execution code |
+00320| | begin | date | Yes | Planned start date |
+00321| | end | date | Yes | Planned end date |
+00322| | days | int | No | Available workdays |
+00323| | lifetime | string | No | Type (short | long | ops) |
+00324| | PO | string | No | Product Owner |
+00325| | PM | string | No | Iteration Manager |
+00326| | QD | string | No | Quality Director |
+00327| | RD | string | No | Release Director |
+00328| | teamMembers | array | No | Team members ["admin"] |
+00329| | desc | string | No | Iteration description |
+00330| | acl | string | No | Access control (private | open inherit project permissions) |
+00331| | whitelist | array | No | Whitelist |
+00332| 
+00333| **Request Example:**
+00334| 
+00335| ```json
+00336| {&quot;name&quot;: &quot;测试执行1&quot;, &quot;code&quot;: &quot;test1&quot;, &quot;begin&quot;: &quot;2021-12-01&quot;, &quot;end&quot;: &quot;2021-12-11&quot;, &quot;days&quot;: 10}
+00337| ```
+00338| 
+00339| ---
+00340| 
+00341| ### GET /programs/:id - Get Program Details
+00342| 
+00343| **Headers:**
+00344| 
+00345| | Header | Required | Description |
+00346| |--------|----------|-------------|
+00347| | Token | Yes | Authentication token |
+00348| 
+00349| ---
+00350| 
+00351| ### DELETE /programs/:id - Delete Program
+00352| 
+00353| **Headers:**
+00354| 
+00355| | Header | Required | Description |
+00356| |--------|----------|-------------|
+00357| | Token | Yes | Authentication token |
+00358| 
+00359| ---
+00360| 
+00361| ### POST /programs - Create Program
+00362| 
+00363| **Headers:**
+00364| 
+00365| | Header | Required | Description |
+00366| |--------|----------|-------------|
+00367| | Token | Yes | Authentication token |
+00368| 
+00369| **Body Parameters:**
+00370| 
+00371| | Parameter | Type | Required | Description |
+00372| |-----------|------|----------|-------------|
+00373| | name | string | No | Project name |
+00374| | parent | string | No | Parent program, 0 means no parent program |
+00375| | PM | string | No | Project Manager |
+00376| | budget | int | No | Budget amount |
+00377| | budgetUnit | string | No | Budget currency (CNY | USD) |
+00378| | desc | string | No | Program description |
+00379| | begin | date | No | Estimated start date |
+00380| | end | date | No | Estimated end date |
+00381| | acl | string | No | Access control (open | private) |
+00382| | whitelist | array | No | Whitelist, only effective when acl = private |
+00383| 
+00384| ---
+00385| 
+00386| ### GET /projects/:id/stories - Get Project Story List
+00387| 
+00388| **Headers:**
+00389| 
+00390| | Header | Required | Description |
+00391| |--------|----------|-------------|
+00392| | Token | Yes | Authentication token |
+00393| 
+00394| ---
+00395| 
+00396| ### PUT /executions/:id - Update Execution
+00397| 
+00398| **Headers:**
+00399| 
+00400| | Header | Required | Description |
+00401| |--------|----------|-------------|
+00402| | Token | Yes | Authentication token |
+00403| 
+00404| **Body Parameters:**
+00405| 
+00406| | Parameter | Type | Required | Description |
+00407| |-----------|------|----------|-------------|
+00408| | project | int | Yes | Parent project |
+00409| | name | string | Yes | Execution name |
+00410| | code | string | Yes | Execution code |
+00411| | begin | date | Yes | Planned start date |
+00412| | end | date | Yes | Planned end date |
+00413| | days | int | No | Available workdays |
+00414| | lifetime | string | No | Type (short | long | ops) |
+00415| | PO | string | No | Product Owner |
+00416| | PM | string | No | Iteration Manager |
+00417| | QD | string | No | Quality Director |
+00418| | RD | string | No | Release Director |
+00419| | teamMembers | array | No | Team members ["admin"] |
+00420| | desc | string | No | Iteration description |
+00421| | acl | string | No | Access control (private | open inherit project permissions) |
+00422| | whitelist | array | No | Whitelist |
+00423| 
+00424| **Request Example:**
+00425| 
+00426| ```json
+00427| {&quot;name&quot;: &quot;测试执行1&quot;, &quot;code&quot;: &quot;test1&quot;, &quot;begin&quot;: &quot;2021-12-01&quot;, &quot;end&quot;: &quot;2021-12-11&quot;, &quot;days&quot;: 10}
+00428| ```
+00429| 
+00430| ---
+00431| 
+00432| ### POST /stories/:id/change - Change Story
+00433| 
+00434| **Headers:**
+00435| 
+00436| | Header | Required | Description |
+00437| |--------|----------|-------------|
+00438| | Token | Yes | Authentication token |
+00439| 
+00440| **Body Parameters:**
+00441| 
+00442| | Parameter | Type | Required | Description |
+00443| |-----------|------|----------|-------------|
+00444| | title | string | No | Story title |
+00445| | spec | string | No | Story description |
+00446| | verify | string | No | Acceptance criteria |
+00447| 
+00448| **Request Example:**
+00449| 
+00450| ```json
+00451| {
+00452|     &quot;spec&quot;: &quot;变更描述&quot;
+00453| }
+00454| ```
+00455| 
+00456| ---
+00457| 
+00458| ### GET /executions/:id - Get Execution Details
+00459| 
+00460| **Headers:**
+00461| 
+00462| | Header | Required | Description |
+00463| |--------|----------|-------------|
+00464| | Token | Yes | Authentication token |
+00465| 
+00466| ---
+00467| 
+00468| ### DELETE /executions/:id - Delete Execution
+00469| 
+00470| **Headers:**
+00471| 
+00472| | Header | Required | Description |
+00473| |--------|----------|-------------|
+00474| | Token | Yes | Authentication token |
+00475| 
+00476| ---
+00477| 
+00478| ### GET /products/:id/stories - Get Product Story List
+00479| 
+00480| **Headers:**
+00481| 
+00482| | Header | Required | Description |
+00483| |--------|----------|-------------|
+00484| | Token | Yes | Authentication token |
+00485| 
+00486| ---
+00487| 
+00488| ### POST /stories - Create Story
+00489| 
+00490| **Headers:**
+00491| 
+00492| | Header | Required | Description |
+00493| |--------|----------|-------------|
+00494| | Token | Yes | Authentication token |
+00495| 
+00496| **Body Parameters:**
+00497| 
+00498| | Parameter | Type | Required | Description |
+00499| |-----------|------|----------|-------------|
+00500| | title | string | Yes | Story title |
+00501| | product | int | Yes | Product |
+00502| | pri | int | Yes | Priority |
+00503| | category | string | Yes | Story category |
+00504| | spec | string | No | Story description |
+00505| | verify | string | No | Acceptance criteria |
+00506| | source | string | No | Source |
+00507| | sourceNote | string | No | Source note |
+00508| | estimate | float | No | Estimated hours |
+00509| | keywords | string | No | Keywords |
+00510| 
+00511| **Request Example:**
+00512| 
+00513| ```json
+00514| {
+00515|     &quot;title&quot;: &quot;测试需求&quot;,
+00516|     &quot;spec&quot;: &quot;测试&quot;,
+00517|     &quot;product&quot;: 1,
+00518|     &quot;pri&quot;: 1,
+00519|     &quot;category&quot;: &quot;feature&quot;
+00520| }
+00521| ```
+00522| 
+00523| ---
+00524| 
+00525| ### GET /executions/:id/stories - Get Execution Story List
+00526| 
+00527| **Headers:**
+00528| 
+00529| | Header | Required | Description |
+00530| |--------|----------|-------------|
+00531| | Token | Yes | Authentication token |
+00532| 
+00533| ---
+00534| 
+00535| ### GET /stories/:id - Get Story Details
+00536| 
+00537| **Headers:**
+00538| 
+00539| | Header | Required | Description |
+00540| |--------|----------|-------------|
+00541| | Token | Yes | Authentication token |
+00542| 
+00543| ---
+00544| 
+00545| ### DELETE /stories/:id - Delete Story
+00546| 
+00547| **Headers:**
+00548| 
+00549| | Header | Required | Description |
+00550| |--------|----------|-------------|
+00551| | Token | Yes | Authentication token |
+00552| 
+00553| ---
+00554| 
+00555| ### GET /executions/:id/tasks - Get Execution Task List
+00556| 
+00557| **Headers:**
+00558| 
+00559| | Header | Required | Description |
+00560| |--------|----------|-------------|
+00561| | Token | Yes | Authentication token |
+00562| 
+00563| ---
+00564| 
+00565| ### PUT /stories/:id - Update Story Fields
+00566| 
+00567| **Headers:**
+00568| 
+00569| | Header | Required | Description |
+00570| |--------|----------|-------------|
+00571| | Token | Yes | Authentication token |
+00572| 
+00573| **Body Parameters:**
+00574| 
+00575| | Parameter | Type | Required | Description |
+00576| |-----------|------|----------|-------------|
+00577| | module | int | No | Module |
+00578| | source | string | No | Source |
+00579| | sourceNote | string | No | Source note |
+00580| | pri | int | No | Priority |
+00581| | category | string | No | Type (feature | interface | performance | safe | experience | improve | other) |
+00582| | estimate | float | No | Estimated hours |
+00583| | keywords | string | No | Keywords |
+00584| 
+00585| **Request Example:**
+00586| 
+00587| ```json
+00588| {
+00589|     &quot;category&quot;: &quot;other&quot;
+00590| }
+00591| ```
+00592| 
+00593| ---
+00594| 
+00595| ### GET /tasks/:id - Get Task Details
+00596| 
+00597| **Headers:**
+00598| 
+00599| | Header | Required | Description |
+00600| |--------|----------|-------------|
+00601| | Token | Yes | Authentication token |
+00602| 
+00603| ---
+00604| 
+00605| ### POST /executions/:id/tasks - Create Task
+00606| 
+00607| **Headers:**
+00608| 
+00609| | Header | Required | Description |
+00610| |--------|----------|-------------|
+00611| | Token | Yes | Authentication token |
+00612| 
+00613| **Body Parameters:**
+00614| 
+00615| | Parameter | Type | Required | Description |
+00616| |-----------|------|----------|-------------|
+00617| | module | int | No | Module |
+00618| | story | int | No | Associated story |
+00619| | fromBug | int | No | From bug |
+00620| | name | string | Yes | Task name |
+00621| | type | string | Yes | Task type (design | devel | request | test | study | discuss | ui | affair | misc) |
+00622| | assignedTo | array | Yes | Assigned to |
+00623| | pri | int | No | Priority |
+00624| | estimate | float | No | Estimated hours |
+00625| | estStarted | date | Yes | Estimated start date |
+00626| | deadline | date | Yes | Estimated end date |
+00627| | openedBy | 1 | Yes | Created by |
+00628| | openedDate | datetime | Yes | Created date |
+00629| 
+00630| **Request Example:**
+00631| 
+00632| ```json
+00633| {
+00634|     &quot;name&quot;: &quot;testtt&quot;,
+00635|     &quot;assignedTo&quot;: [ &quot;admin&quot; ],
+00636|     &quot;type&quot;: &quot;devel&quot;,
+00637|     &quot;estStarted&quot;: &quot;2021-12-01&quot;,
+00638|     &quot;deadline&quot;: &quot;2021-12-31&quot;
+00639| }
+00640| ```
+00641| 
+00642| ---
+00643| 
+00644| ### DELETE /tasks/:id - Delete Task
+00645| 
+00646| **Headers:**
+00647| 
+00648| | Header | Required | Description |
+00649| |--------|----------|-------------|
+00650| | Token | Yes | Authentication token |
+00651| 
+00652| ---
+00653| 
+00654| ### GET /products/:id/bugs - Get Product Bug List
+00655| 
+00656| **Headers:**
+00657| 
+00658| | Header | Required | Description |
+00659| |--------|----------|-------------|
+00660| | Token | Yes | Authentication token |
+00661| 
+00662| ---
+00663| 
+00664| ### PUT /tasks/:id - Update Task
+00665| 
+00666| **Headers:**
+00667| 
+00668| | Header | Required | Description |
+00669| |--------|----------|-------------|
+00670| | Token | Yes | Authentication token |
+00671| 
+00672| **Body Parameters:**
+00673| 
+00674| | Parameter | Type | Required | Description |
+00675| |-----------|------|----------|-------------|
+00676| | module | int | No | Module |
+00677| | story | int | No | Associated story |
+00678| | fromBug | int | No | From bug |
+00679| | name | string | No | Task name |
+00680| | type | string | No | Task type (design | devel | request | test | study | discuss | ui | affair | misc) |
+00681| | assignedTo | array | No | Assigned to, ["admin"] |
+00682| | pri | int | No | Priority |
+00683| | estimate | float | No | Estimated hours |
+00684| | estStarted | date | No | Estimated start date |
+00685| | deadline | date | No | Estimated end date |
+00686| 
+00687| **Request Example:**
+00688| 
+00689| ```json
+00690| {
+00691|     &quot;name&quot;: &quot;testtt&quot;,
+00692|     &quot;assignedTo&quot;: [ &quot;admin&quot; ],
+00693|     &quot;type&quot;: &quot;devel&quot;,
+00694|     &quot;estStarted&quot;: &quot;2021-12-01&quot;,
+00695|     &quot;deadline&quot;: &quot;2021-12-31&quot;
+00696| }
+00697| ```
+00698| 
+00699| ---
+00700| 
+00701| ### POST /products/:id/bugs - Create Bug
+00702| 
+00703| **Headers:**
+00704| 
+00705| | Header | Required | Description |
+00706| |--------|----------|-------------|
+00707| | Token | Yes | Authentication token |
+00708| 
+00709| **Body Parameters:**
+00710| 
+00711| | Parameter | Type | Required | Description |
+00712| |-----------|------|----------|-------------|
+00713| | branch | int | No | Branch |
+00714| | module | int | No | Module |
+00715| | execution | int | No | Execution |
+00716| | title | string | Yes | Bug title |
+00717| | keywords | string | No | Keywords |
+00718| | severity | int | Yes | Severity |
+00719| | pri | int | Yes | Priority |
+00720| | type | string | Yes | Bug type (codeerror | config | install | security | performance | standard | automation | designdefect | others) |
+00721| | os | string | No | Operating system |
+00722| | browser | string | No | Browser |
+00723| | steps | string | No | Reproduction steps |
+00724| | task | int | No | Related task |
+00725| | story | int | No | Related story |
+00726| | deadline | date | No | Deadline |
+00727| | openedBuild | array | No | Affected builds |
+00728| 
+00729| **Request Example:**
+00730| 
+00731| ```json
+00732| {
+00733|     &quot;title&quot;: &quot;Bug2&quot;,
+00734|     &quot;severity&quot;: 1,
+00735|     &quot;pri&quot;: 1,
+00736|     &quot;steps&quot;: &quot;&quot;,
+00737|     &quot;type&quot;: &quot;codeerror&quot;,
+00738|     &quot;openedBuild&quot;: [
+00739|         &quot;trunk&quot;
+00740|     ]
+00741| }
+00742| ```
+00743| 
+00744| ---
+00745| 
+00746| ### PUT /bugs/:id - Update Bug
+00747| 
+00748| **Headers:**
+00749| 
+00750| | Header | Required | Description |
+00751| |--------|----------|-------------|
+00752| | Token | Yes | Authentication token |
+00753| 
+00754| **Body Parameters:**
+00755| 
+00756| | Parameter | Type | Required | Description |
+00757| |-----------|------|----------|-------------|
+00758| | branch | int | No | Branch |
+00759| | module | int | No | Module |
+00760| | execution | int | No | Execution |
+00761| | title | string | Yes | Bug title |
+00762| | keywords | string | No | Keywords |
+00763| | severity | int | Yes | Severity |
+00764| | pri | int | Yes | Priority |
+00765| | type | string | Yes | Bug type (codeerror | config | install | security | performance | standard | automation | designdefect | others) |
+00766| | os | string | No | Operating system |
+00767| | browser | string | No | Browser |
+00768| | steps | string | No | Reproduction steps |
+00769| | task | int | No | Related task |
+00770| | story | int | No | Related story |
+00771| | deadline | date | No | Deadline |
+00772| | openedBuild | array | No | Affected builds |
+00773| 
+00774| **Request Example:**
+00775| 
+00776| ```json
+00777| {
+00778|     &quot;title&quot;: &quot;Bug2&quot;,
+00779|     &quot;severity&quot;: 1,
+00780|     &quot;pri&quot;: 1,
+00781|     &quot;steps&quot;: &quot;&quot;,
+00782|     &quot;type&quot;: &quot;codeerror&quot;,
+00783|     &quot;openedBuild&quot;: [
+00784|         &quot;trunk&quot;
+00785|     ]
+00786| }
+00787| ```
+00788| 
+00789| ---
+00790| 
+00791| ### GET /bugs/:id - Get Bug Details
+00792| 
+00793| **Headers:**
+00794| 
+00795| | Header | Required | Description |
+00796| |--------|----------|-------------|
+00797| | Token | Yes | Authentication token |
+00798| 
+00799| ---
+00800| 
+00801| ### DELETE /bugs/:id - Delete Bug
+00802| 
+00803| **Headers:**
+00804| 
+00805| | Header | Required | Description |
+00806| |--------|----------|-------------|
+00807| | Token | Yes | Authentication token |
+00808| 
+00809| ---
+00810| 
+00811| ### GET /products/:id/testcases - Get Product Test Case List
+00812| 
+00813| **Headers:**
+00814| 
+00815| | Header | Required | Description |
+00816| |--------|----------|-------------|
+00817| | Token | Yes | Authentication token |
+00818| 
+00819| ---
+00820| 
+00821| ### POST /products/:id/testcases - Create Test Case
+00822| 
+00823| **Headers:**
+00824| 
+00825| | Header | Required | Description |
+00826| |--------|----------|-------------|
+00827| | Token | Yes | Authentication token |
+00828| 
+00829| **Body Parameters:**
+00830| 
+00831| | Parameter | Type | Required | Description |
+00832| |-----------|------|----------|-------------|
+00833| | branch | int | No | Branch |
+00834| | module | int | No | Module |
+00835| | story | int | No | Story |
+00836| | title | string | Yes | Test case title |
+00837| | type | string | Yes | Test case type (feature | performance | config | install | security | interface | unit | other) |
+00838| | stage | string | No | Stage (unittest | feature | intergrate | system | smoke | bvt) |
+00839| | precondition | string | No | Precondition |
+00840| | pri | int | No | Priority |
+00841| | steps | array | Yes | Test case steps |
+00842| | keywords | string | No | Keywords |
+00843| 
+00844| **Request Example:**
+00845| 
+00846| ```json
+00847| {
+00848|     &quot;title&quot;: &quot;case1&quot;,
+00849|     &quot;pri&quot;: 1,
+00850|     &quot;steps&quot;: [
+00851|         {
+00852|             &quot;desc&quot;: &quot;步骤1&quot;,
+00853|             &quot;expect&quot;: &quot;结果1&quot;
+00854|         }
+00855|     ],
+00856|     &quot;type&quot;: &quot;feature&quot;
+00857| }
+00858| ```
+00859| 
+00860| ---
+00861| 
+00862| ### POST /products/:id/plans - Create Plan
+00863| 
+00864| **Headers:**
+00865| 
+00866| | Header | Required | Description |
+00867| |--------|----------|-------------|
+00868| | Token | Yes | Authentication token |
+00869| 
+00870| **Body Parameters:**
+00871| 
+00872| | Parameter | Type | Required | Description |
+00873| |-----------|------|----------|-------------|
+00874| | branch | int | No | Branch |
+00875| | title | string | Yes | Plan name |
+00876| | begin | date | No | Plan start date |
+00877| | end | date | No | Plan end date |
+00878| | desc | string | No | Plan description |
+00879| | parent | int | No | Parent plan |
+00880| 
+00881| ---
+00882| 
+00883| ### GET /testcases/:id - Get Test Case Details
+00884| 
+00885| **Headers:**
+00886| 
+00887| | Header | Required | Description |
+00888| |--------|----------|-------------|
+00889| | Token | Yes | Authentication token |
+00890| 
+00891| ---
+00892| 
+00893| ### PUT /testcases/:id - Update Test Case
+00894| 
+00895| **Headers:**
+00896| 
+00897| | Header | Required | Description |
+00898| |--------|----------|-------------|
+00899| | Token | Yes | Authentication token |
+00900| 
+00901| **Body Parameters:**
+00902| 
+00903| | Parameter | Type | Required | Description |
+00904| |-----------|------|----------|-------------|
+00905| | branch | int | No | Branch |
+00906| | module | int | No | Module |
+00907| | story | int | No | Story |
+00908| | title | string | No | Test case title |
+00909| | type | string | No | Test case type (feature | performance | config | install | security | interface | unit | other) |
+00910| | stage | string | No | Stage (unittest | feature | intergrate | system | smoke | bvt) |
+00911| | precondition | string | No | Precondition |
+00912| | pri | int | No | Priority |
+00913| | steps | array | No | Test case steps |
+00914| | keywords | string | No | Keywords |
+00915| 
+00916| **Request Example:**
+00917| 
+00918| ```json
+00919| {
+00920|     &quot;title&quot;: &quot;case1&quot;,
+00921|     &quot;pri&quot;: 1,
+00922|     &quot;steps&quot;: [
+00923|         {
+00924|             &quot;desc&quot;: &quot;步骤1&quot;,
+00925|             &quot;expect&quot;: &quot;结果1&quot;
+00926|         }
+00927|     ],
+00928|     &quot;type&quot;: &quot;feature&quot;
+00929| }
+00930| ```
+00931| 
+00932| ---
+00933| 
+00934| ### DELETE /testcases/:id - Delete Test Case
+00935| 
+00936| **Headers:**
+00937| 
+00938| | Header | Required | Description |
+00939| |--------|----------|-------------|
+00940| | Token | Yes | Authentication token |
+00941| 
+00942| ---
+00943| 
+00944| ### GET /products/:id/plans - Get Product Plan List
+00945| 
+00946| **Headers:**
+00947| 
+00948| | Header | Required | Description |
+00949| |--------|----------|-------------|
+00950| | Token | Yes | Authentication token |
+00951| 
+00952| ---
+00953| 
+00954| ### GET /productplans/:id - Get Plan Details
+00955| 
+00956| **Headers:**
+00957| 
+00958| | Header | Required | Description |
+00959| |--------|----------|-------------|
+00960| | Token | Yes | Authentication token |
+00961| 
+00962| ---
+00963| 
+00964| ### PUT /productplans/:id - Update Plan
+00965| 
+00966| **Headers:**
+00967| 
+00968| | Header | Required | Description |
+00969| |--------|----------|-------------|
+00970| | Token | Yes | Authentication token |
+00971| 
+00972| **Body Parameters:**
+00973| 
+00974| | Parameter | Type | Required | Description |
+00975| |-----------|------|----------|-------------|
+00976| | branch | int | No | Branch |
+00977| | title | string | Yes | Plan name |
+00978| | begin | date | No | Plan start date |
+00979| | end | date | No | Plan end date |
+00980| | desc | string | No | Plan description |
+00981| 
+00982| ---
+00983| 
+00984| ### DELETE /productsplan/:id - Delete Plan
+00985| 
+00986| **Headers:**
+00987| 
+00988| | Header | Required | Description |
+00989| |--------|----------|-------------|
+00990| | Token | Yes | Authentication token |
+00991| 
+00992| ---
+00993| 
+00994| ### POST /productplans/:id/linkstories - Link Stories to Product Plan
+00995| 
+00996| **Headers:**
+00997| 
+00998| | Header | Required | Description |
+00999| |--------|----------|-------------|
+01000| | Token | Yes | Authentication token |
+01001| 
+01002| **Body Parameters:**
+01003| 
+01004| | Parameter | Type | Required | Description |
+01005| |-----------|------|----------|-------------|
+01006| | stories | array | No | New stories to link, e.g. [1, 2] |
+01007| 
+01008| **Request Example:**
+01009| 
+01010| ```json
+01011| {
+01012|     &quot;stories&quot;: [ 11 ]
+01013| }
+01014| ```
+01015| 
+01016| ---
+01017| 
+01018| ### POST /productplans/:id/unlinkstories - Unlink Stories from Product Plan
+01019| 
+01020| **Headers:**
+01021| 
+01022| | Header | Required | Description |
+01023| |--------|----------|-------------|
+01024| | Token | Yes | Authentication token |
+01025| 
+01026| **Body Parameters:**
+01027| 
+01028| | Parameter | Type | Required | Description |
+01029| |-----------|------|----------|-------------|
+01030| | stories | array | Yes | Story IDs to unlink, e.g. [1, 2] |
+01031| 
+01032| **Request Example:**
+01033| 
+01034| ```json
+01035| {
+01036|     &quot;stories&quot;: [11]
+01037| }
+01038| ```
+01039| 
+01040| ---
+01041| 
+01042| ### POST /products/:id/linkBugs - Link Bugs to Product Plan
+01043| 
+01044| **Body Parameters:**
+01045| 
+01046| | Parameter | Type | Required | Description |
+01047| |-----------|------|----------|-------------|
+01048| | bugs | array | Yes | Bug IDs to link, e.g. [1, 2] |
+01049| 
+01050| **Request Example:**
+01051| 
+01052| ```json
+01053| {
+01054|     &quot;bugs&quot;: [7]
+01055| }
+01056| ```
+01057| 
+01058| ---
+01059| 
+01060| ### POST /productplans/:id/unlinkbugs - Unlink Bugs from Product Plan
+01061| 
+01062| **Headers:**
+01063| 
+01064| | Header | Required | Description |
+01065| |--------|----------|-------------|
+01066| | Token | Yes | Authentication token |
+01067| 
+01068| **Body Parameters:**
+01069| 
+01070| | Parameter | Type | Required | Description |
+01071| |-----------|------|----------|-------------|
+01072| | bugs | array | Yes | Bug IDs to unlink, e.g. [1, 2] |
+01073| 
+01074| **Request Example:**
+01075| 
+01076| ```json
+01077| {
+01078|     &quot;bugs&quot;: [7]
+01079| }
+01080| ```
+01081| 
+01082| ---
+01083| 
+01084| ### GET /projects/:id/builds - Get Project Build List
+01085| 
+01086| **Headers:**
+01087| 
+01088| | Header | Required | Description |
+01089| |--------|----------|-------------|
+01090| | Token | Yes | Authentication token |
+01091| 
+01092| ---
+01093| 
+01094| ### GET /executions/:id/builds - Get Execution Build List
+01095| 
+01096| **Headers:**
+01097| 
+01098| | Header | Required | Description |
+01099| |--------|----------|-------------|
+01100| | Token | Yes | Authentication token |
+01101| 
+01102| ---
+01103| 
+01104| ### PUT /builds/:id - Update Build
+01105| 
+01106| **Headers:**
+01107| 
+01108| | Header | Required | Description |
+01109| |--------|----------|-------------|
+01110| | Token | Yes | Authentication token |
+01111| 
+01112| ---
+01113| 
+01114| ### POST /projects/:id/builds - Create Build
+01115| 
+01116| **Headers:**
+01117| 
+01118| | Header | Required | Description |
+01119| |--------|----------|-------------|
+01120| | Token | Yes | Authentication token |
+01121| 
+01122| **Body Parameters:**
+01123| 
+01124| | Parameter | Type | Required | Description |
+01125| |-----------|------|----------|-------------|
+01126| | execution | int | Yes | Execution |
+01127| | product | int | Yes | Product |
+01128| | branch | int | No | Branch |
+01129| | name | string | Yes | Build name |
+01130| | builder | string | Yes | Builder |
+01131| | date | date | No | Build date |
+01132| | scmPath | string | No | Source code path |
+01133| | filePath | string | No | Download URL |
+01134| | desc | string | No | Build description |
+01135| 
+01136| **Request Example:**
+01137| 
+01138| ```json
+01139| {
+01140|     &quot;name&quot;: &quot;test&quot;,
+01141|     &quot;product&quot;: 4,
+01142|     &quot;date&quot;: &quot;2021-01-01&quot;,
+01143|     &quot;execution&quot;: 42,
+01144|     &quot;builder&quot;: &quot;admin&quot;
+01145| }
+01146| ```
+01147| 
+01148| ---
+01149| 
+01150| ### GET /builds/:id - Get Build Details
+01151| 
+01152| **Headers:**
+01153| 
+01154| | Header | Required | Description |
+01155| |--------|----------|-------------|
+01156| | Token | Yes | Authentication token |
+01157| 
+01158| ---
+01159| 
+01160| ### DELETE /builds/:id - Delete Build
+01161| 
+01162| **Headers:**
+01163| 
+01164| | Header | Required | Description |
+01165| |--------|----------|-------------|
+01166| | Token | Yes | Authentication token |
+01167| 
+01168| ---
+01169| 
+01170| ### GET /testtasks - Get Test Task List
+01171| 
+01172| **Headers:**
+01173| 
+01174| | Header | Required | Description |
+01175| |--------|----------|-------------|
+01176| | Token | Yes | Authentication token |
+01177| 
+01178| **Query Parameters:**
+01179| 
+01180| | Parameter | Required | Description |
+01181| |-----------|----------|-------------|
+01182| | page | No | Current page, default is 1 |
+01183| | limit | No | Number of test tasks per page, default 20 |
+01184| | order | No | Sort order, default id_desc (by ID descending) |
+01185| | product | No | Product |
+01186| | branch | No | Branch |
+01187| 
+01188| ---
+01189| 
+01190| ### GET /projects/:id/testtasks - Get Project Test Tasks
+01191| 
+01192| **Headers:**
+01193| 
+01194| | Header | Required | Description |
+01195| |--------|----------|-------------|
+01196| | Token | Yes | Authentication token |
+01197| 
+01198| ---
+01199| 
+01200| ### GET /users/:id - Get User Info
+01201| 
+01202| **Headers:**
+01203| 
+01204| | Header | Required | Description |
+01205| |--------|----------|-------------|
+01206| | Token | Yes | Authentication token |
+01207| 
+01208| ---
+01209| 
+01210| ### GET /projects/:id/releases - Get Project Release List
+01211| 
+01212| **Headers:**
+01213| 
+01214| | Header | Required | Description |
+01215| |--------|----------|-------------|
+01216| | Token | Yes | Authentication token |
+01217| 
+01218| ---
+01219| 
+01220| ### GET /user - Get My Profile
+01221| 
+01222| **Headers:**
+01223| 
+01224| | Header | Required | Description |
+01225| |--------|----------|-------------|
+01226| | Token | Yes | Authentication token |
+01227| 
+01228| ---
+01229| 
+01230| ### GET /testtasks/:id - Get Test Task Details
+01231| 
+01232| **Headers:**
+01233| 
+01234| | Header | Required | Description |
+01235| |--------|----------|-------------|
+01236| | Token | Yes | Authentication token |
+01237| 
+01238| ---
+01239| 
+01240| ### GET /products/:id/releases - Get Product Release List
+01241| 
+01242| **Headers:**
+01243| 
+01244| | Header | Required | Description |
+01245| |--------|----------|-------------|
+01246| | Token | Yes | Authentication token |
+01247| 
+01248| ---
+01249| 
+01250| ### DELETE /users/:id - Delete User
+01251| 
+01252| **Headers:**
+01253| 
+01254| | Header | Required | Description |
+01255| |--------|----------|-------------|
+01256| | Token | Yes | Authentication token |
+01257| 
+01258| ---
+01259| 
+01260| ### POST /users - Create User
+01261| 
+01262| **Headers:**
+01263| 
+01264| | Header | Required | Description |
+01265| |--------|----------|-------------|
+01266| | Token | Yes | Authentication token |
+01267| 
+01268| **Body Parameters:**
+01269| 
+01270| | Parameter | Type | Required | Description |
+01271| |-----------|------|----------|-------------|
+01272| | account | string | Yes | Account |
+01273| | password | string | Yes | Password |
+01274| | realname | string | No | Real name |
+01275| | visions | array | No | Interface ["rnd", "lite"], (R&D comprehensive interface rnd, Operations management interface lite). Default is rnd |
+01276| 
+01277| **Request Example:**
+01278| 
+01279| ```json
+01280| {&quot;account&quot;: &quot;usertest&quot;, &quot;password&quot;: &quot;123qwe!@#&quot;, &quot;realname&quot;: &quot;测试用户&quot;}
+01281| ```
+01282| 
+01283| ---
+01284| 
+01285| ### PUT /users/:id - Update User Info
+01286| 
+01287| **Headers:**
+01288| 
+01289| | Header | Required | Description |
+01290| |--------|----------|-------------|
+01291| | Token | Yes | Authentication token |
+01292| 
+01293| **Body Parameters:**
+01294| 
+01295| | Parameter | Type | Required | Description |
+01296| |-----------|------|----------|-------------|
+01297| | dept | int | No | Department |
+01298| | role | string | No | Role |
+01299| | mobile | string | No | Mobile number |
+01300| | realname | string | No | Real name |
+01301| | email | string | No | Email |
+01302| | phone | string | No | Phone number |
+01303| 
+01304| **Request Example:**
+01305| 
+01306| ```json
+01307| {
+01308|     &quot;realname&quot;: &quot;管理员&quot;
+01309| }
+01310| ```
+01311| 
+01312| ---
+01313| 
+01314| ### GET /users - Get User List
+01315| 
+01316| **Headers:**
+01317| 
+01318| | Header | Required | Description |
+01319| |--------|----------|-------------|
+01320| | Token | Yes | Authentication token |
+01321| 
+01322| **Query Parameters:**
+01323| 
+01324| | Parameter | Required | Description |
+01325| |-----------|----------|-------------|
+01326| | page | Yes | Current page |
+01327| | limit | Yes | Number of users per page |
+01328| 
+01329| ---
+01330| 
+01331| ### GET /feedbacks/:id - Get Feedback Details
+01332| 
+01333| **Headers:**
+01334| 
+01335| | Header | Required | Description |
+01336| |--------|----------|-------------|
+01337| | Token | Yes | Authentication token |
+01338| 
+01339| ---
+01340| 
+01341| ### PUT /feedbacks/:id - Update Feedback
+01342| 
+01343| **Headers:**
+01344| 
+01345| | Header | Required | Description |
+01346| |--------|----------|-------------|
+01347| | Token | Yes | Authentication token |
+01348| 
+01349| **Body Parameters:**
+01350| 
+01351| | Parameter | Type | Required | Description |
+01352| |-----------|------|----------|-------------|
+01353| | product | int | No | Product |
+01354| | module | int | No | Module |
+01355| | title | string | No | Title |
+01356| | type | string | No | Type (story | task | bug | todo | advice). New program mode also includes (issue | risk | opportunity) |
+01357| | desc | string | No | Description |
+01358| | public | int | No | Public |
+01359| | notify | int | No | Notify |
+01360| | notifyEmail | string | No | Notify email |
+01361| | feedbackBy | string | No | Feedback by |
+01362| 
+01363| **Request Example:**
+01364| 
+01365| ```json
+01366| {
+01367|     &quot;title&quot;: &quot;test&quot;,
+01368|     &quot;desc&quot;: &quot;edit test&quot;
+01369| }
+01370| ```
+01371| 
+01372| ---
+01373| 
+01374| ### DELETE /feedbacks/:id - Delete Feedback
+01375| 
+01376| **Headers:**
+01377| 
+01378| | Header | Required | Description |
+01379| |--------|----------|-------------|
+01380| | Token | Yes | Authentication token |
+01381| 
+01382| ---
+01383| 
+01384| ### POST /feedbacks/:id/assign - Assign Feedback
+01385| 
+01386| **Headers:**
+01387| 
+01388| | Header | Required | Description |
+01389| |--------|----------|-------------|
+01390| | Token | Yes | Authentication token |
+01391| 
+01392| **Body Parameters:**
+01393| 
+01394| | Parameter | Type | Required | Description |
+01395| |-----------|------|----------|-------------|
+01396| | assignedTo | string | No | Assign to, fill in user's account field |
+01397| | comment | string | No | Comment |
+01398| | mailto | string | No | CC to, fill in user's account field separated by "," |
+01399| 
+01400| **Request Example:**
+01401| 
+01402| ```json
+01403| {
+01404|     &quot;assignedTo&quot;: &quot;admin&quot;,
+01405|     &quot;comment&quot;:&quot;yes&quot;
+01406| }
+01407| ```
+01408| 
+01409| ---
+01410| 
+01411| ### POST /feedbacks/:id/close - Close Feedback
+01412| 
+01413| **Headers:**
+01414| 
+01415| | Header | Required | Description |
+01416| |--------|----------|-------------|
+01417| | Token | Yes | Authentication token |
+01418| 
+01419| **Body Parameters:**
+01420| 
+01421| | Parameter | Type | Required | Description |
+01422| |-----------|------|----------|-------------|
+01423| | closedReason | string | No | Close reason (commented | repeat | refuse) |
+01424| | comment | string | No | Comment |
+01425| 
+01426| **Request Example:**
+01427| 
+01428| ```json
+01429| {
+01430|     &quot;closedReason&quot;:&quot;repeat&quot;
+01431| }
+01432| ```
+01433| 
+01434| ---
+01435| 
+01436| ### POST /feedbacks - Create Feedback
+01437| 
+01438| **Headers:**
+01439| 
+01440| | Header | Required | Description |
+01441| |--------|----------|-------------|
+01442| | Token | Yes | Authentication token |
+01443| 
+01444| **Body Parameters:**
+01445| 
+01446| | Parameter | Type | Required | Description |
+01447| |-----------|------|----------|-------------|
+01448| | product | int | Yes | Product |
+01449| | module | int | No | Module |
+01450| | title | string | Yes | Title |
+01451| | type | string | No | Type (story | task | bug | todo | advice). New program mode also includes (issue | risk | opportunity) |
+01452| | desc | string | No | Description |
+01453| | public | int | No | Public |
+01454| | notify | int | No | Notify |
+01455| | notifyEmail | string | No | Notify email |
+01456| | feedbackBy | string | No | Feedback by |
+01457| 
+01458| **Request Example:**
+01459| 
+01460| ```json
+01461| {
+01462|     &quot;product&quot;: 2,
+01463|     &quot;title&quot;:&quot;create test feedback&quot;
+01464| }
+01465| ```
+01466| 
+01467| ---
+01468| 
+01469| ### GET /tickets - Get Ticket List
+01470| 
+01471| **Headers:**
+01472| 
+01473| | Header | Required | Description |
+01474| |--------|----------|-------------|
+01475| | Token | Yes | Authentication token |
+01476| 
+01477| **Query Parameters:**
+01478| 
+01479| | Parameter | Required | Description |
+01480| |-----------|----------|-------------|
+01481| | browseType | No | Ticket status (all | wait | doing | done | finishedbyme | openedbyme | assignedtome) |
+01482| | param | No | Module ID, default is 0 |
+01483| | orderBy | No | Sort order, default id_desc; sort field + underscore + asc/desc |
+01484| | page | No | Page number, default is 1 |
+01485| | limit | No | Number of tickets per page, default 20 |
+01486| 
+01487| ---
+01488| 
+01489| ### GET /tickets/:id - Get Ticket Details
+01490| 
+01491| **Headers:**
+01492| 
+01493| | Header | Required | Description |
+01494| |--------|----------|-------------|
+01495| | Token | Yes | Authentication token |
+01496| 
+01497| ---
+01498| 
+01499| ### PUT /tickets/:id - Update Ticket
+01500| 
+01501| **Headers:**
+01502| 
+01503| | Header | Required | Description |
+01504| |--------|----------|-------------|
+01505| | Token | Yes | Authentication token |
+01506| 
+01507| **Body Parameters:**
+01508| 
+01509| | Parameter | Type | Required | Description |
+01510| |-----------|------|----------|-------------|
+01511| | product | int | Yes | Product ID |
+01512| | module | int | Yes | Module ID |
+01513| | title | string | Yes | Ticket name |
+01514| | type | string | No | Ticket type (code | data | stuck | security | affair) |
+01515| | desc | string | No | Ticket description |
+01516| 
+01517| **Request Example:**
+01518| 
+01519| ```json
+01520| {
+01521|     &quot;title&quot;: &quot;test&quot;,
+01522|     &quot;desc&quot;: &quot;edit test&quot;
+01523| }
+01524| ```
+01525| 
+01526| ---
+01527| 
+01528| ### POST /tickets - Create Ticket
+01529| 
+01530| **Headers:**
+01531| 
+01532| | Header | Required | Description |
+01533| |--------|----------|-------------|
+01534| | Token | Yes | Authentication token |
+01535| 
+01536| **Query Parameters:**
+01537| 
+01538| | Parameter | Required | Description |
+01539| |-----------|------|----------|-------------|
+01540| | product | Yes | Product ID |
+01541| | module | Yes | Module ID |
+01542| | title | Yes | Ticket name |
+01543| | type | No | Ticket type (code | data | stuck | security | affair) |
+01544| 
+01545| **Body Parameters:**
+01546| 
+01547| | Parameter | Type | Required | Description |
+01548| |-----------|------|----------|-------------|
+01549| | product | int | Yes | Product ID |
+01550| | module | int | Yes | Module ID |
+01551| | title | string | Yes | Ticket name |
+01552| | type | string | Yes | Ticket type |
+01553| 
+01554| **Request Example:**
+01555| 
+01556| ```json
+01557| {
+01558|     &quot;product&quot;: 2,
+01559|     &quot;module&quot;:2,
+01560|     &quot;title&quot;:&quot;create test ticket&quot;
+01561| }
+01562| ```
+01563| 
+01564| ---
+01565| 
+01566| ### DELETE /tickets/:id - Delete Ticket
+01567| 
+01568| **Headers:**
+01569| 
+01570| | Header | Required | Description |
+01571| |--------|----------|-------------|
+01572| | Token | Yes | Authentication token |
+01573| 
+01574| ---
+01575| 
