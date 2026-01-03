@@ -219,8 +219,20 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering zanode tools", nil)
 	tools.RegisterZanodeTools(s, ztClient)
 
+	logger.Debug("server", "Registering case library tools", nil)
+	tools.RegisterCaseLibTools(s, ztClient)
+
+	logger.Debug("server", "Registering QA tools", nil)
+	tools.RegisterQaTools(s, ztClient)
+
+	logger.Debug("server", "Registering test report tools", nil)
+	tools.RegisterTestReportTools(s, ztClient)
+
+	logger.Debug("server", "Registering test suite tools", nil)
+	tools.RegisterTestSuiteTools(s, ztClient)
+
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 304,
+		"total_tools": 400,
 	})
 }
 
@@ -306,9 +318,21 @@ func registerResources(s *server.MCPServer) {
 	logger.Debug("server", "Registering zanode resources", nil)
 	resources.RegisterZanodeResources(s, ztClient)
 
+	logger.Debug("server", "Registering case library resources", nil)
+	resources.RegisterCaseLibResources(s, ztClient)
+
+	logger.Debug("server", "Registering QA resources", nil)
+	resources.RegisterQaResources(s, ztClient)
+
+	logger.Debug("server", "Registering test report resources", nil)
+	resources.RegisterTestReportResources(s, ztClient)
+
+	logger.Debug("server", "Registering test suite resources", nil)
+	resources.RegisterTestSuiteResources(s, ztClient)
+
 	logger.Info("server", "All resource registrations completed", map[string]interface{}{
-		"total_resources": 42,
-		"templates_registered": 96,
+		"total_resources": 46,
+		"templates_registered": 100,
 		"note": "List resources + resource templates for individual/scoped access",
 	})
 }
