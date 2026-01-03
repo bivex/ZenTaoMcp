@@ -15,6 +15,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -73,15 +74,16 @@ func RegisterTestTaskResources(s *server.MCPServer, client *client.ZenTaoClient)
 
 	// Register project test tasks resource template
 	s.AddResourceTemplate(
-		mcp.NewResourceTemplate("zentao://projects/{id}/testtasks", "ZenTao Project Test Tasks"),
+		mcp.NewResourceTemplate("zentao://projects/{projectId}/testtasks", "ZenTao Project Test Tasks"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually
+			// Extract project ID from URI manually
 			uri := request.Params.URI
-			id := extractIDFromURI(uri, "projects")
-
-			if id == "" {
-				return nil, fmt.Errorf("project ID not found in URI: %s", uri)
+			// For URI like zentao://projects/123/testtasks, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "projects" || parts[2] != "testtasks" {
+				return nil, fmt.Errorf("invalid project testtasks URI format: %s", uri)
 			}
+			id := parts[1]
 
 			resp, err := client.Get(fmt.Sprintf("/projects/%s/testtasks", id))
 			if err != nil {

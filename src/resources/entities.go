@@ -15,10 +15,12 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/zentao/mcp-server/client"
+	"github.com/zentao/mcp-server/logger"
 )
 
 func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
@@ -27,15 +29,16 @@ func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 	// Register product stories resource template
 	s.AddResourceTemplate(
-		mcp.NewResourceTemplate("zentao://products/{id}/stories", "ZenTao Product Stories"),
+		mcp.NewResourceTemplate("zentao://products/{productId}/stories", "ZenTao Product Stories"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually
+			// Extract product ID from URI manually
 			uri := request.Params.URI
-			id := extractIDFromURI(uri, "products")
-
-			if id == "" {
-				return nil, fmt.Errorf("product ID not found in URI: %s", uri)
+			// For URI like zentao://products/123/stories, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "products" || parts[2] != "stories" {
+				return nil, fmt.Errorf("invalid product stories URI format: %s", uri)
 			}
+			id := parts[1]
 
 			resp, err := client.Get(fmt.Sprintf("/products/%s/stories", id))
 			if err != nil {
@@ -86,15 +89,16 @@ func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 	// Register execution tasks resource template
 	s.AddResourceTemplate(
-		mcp.NewResourceTemplate("zentao://executions/{id}/tasks", "ZenTao Execution Tasks"),
+		mcp.NewResourceTemplate("zentao://executions/{executionId}/tasks", "ZenTao Execution Tasks"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually
+			// Extract execution ID from URI manually
 			uri := request.Params.URI
-			id := extractIDFromURI(uri, "executions")
-
-			if id == "" {
-				return nil, fmt.Errorf("execution ID not found in URI: %s", uri)
+			// For URI like zentao://executions/123/tasks, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "executions" || parts[2] != "tasks" {
+				return nil, fmt.Errorf("invalid execution tasks URI format: %s", uri)
 			}
+			id := parts[1]
 
 			resp, err := client.Get(fmt.Sprintf("/executions/%s/tasks", id))
 			if err != nil {
@@ -164,15 +168,16 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 
 	// Register product bugs resource template
 	s.AddResourceTemplate(
-		mcp.NewResourceTemplate("zentao://products/{id}/bugs", "ZenTao Product Bugs"),
+		mcp.NewResourceTemplate("zentao://products/{productId}/bugs", "ZenTao Product Bugs"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually
+			// Extract product ID from URI manually
 			uri := request.Params.URI
-			id := extractIDFromURI(uri, "products")
-
-			if id == "" {
-				return nil, fmt.Errorf("product ID not found in URI: %s", uri)
+			// For URI like zentao://products/123/bugs, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "products" || parts[2] != "bugs" {
+				return nil, fmt.Errorf("invalid product bugs URI format: %s", uri)
 			}
+			id := parts[1]
 
 			resp, err := client.Get(fmt.Sprintf("/products/%s/bugs", id))
 			if err != nil {
@@ -205,6 +210,13 @@ func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to get bug details: %w", err)
 			}
+
+			// Log the response for debugging
+			logger.Debug("resources", "Bug details response", map[string]interface{}{
+				"uri":      uri,
+				"id":       id,
+				"response": string(resp),
+			})
 
 			return []mcp.ResourceContents{
 				mcp.TextResourceContents{

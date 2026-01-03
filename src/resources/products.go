@@ -16,6 +16,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -136,15 +137,16 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 
 	// Register project executions resource template
 	s.AddResourceTemplate(
-		mcp.NewResourceTemplate("zentao://projects/{id}/executions", "ZenTao Project Executions"),
+		mcp.NewResourceTemplate("zentao://projects/{projectId}/executions", "ZenTao Project Executions"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually
+			// Extract project ID from URI manually
 			uri := request.Params.URI
-			id := extractIDFromURI(uri, "projects")
-
-			if id == "" {
-				return nil, fmt.Errorf("project ID not found in URI: %s", uri)
+			// For URI like zentao://projects/123/executions, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "projects" || parts[2] != "executions" {
+				return nil, fmt.Errorf("invalid project executions URI format: %s", uri)
 			}
+			id := parts[1]
 
 			resp, err := client.Get(fmt.Sprintf("/projects/%s/executions", id))
 			if err != nil {
@@ -163,15 +165,16 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 
 	// Register project stories resource template
 	s.AddResourceTemplate(
-		mcp.NewResourceTemplate("zentao://projects/{id}/stories", "ZenTao Project Stories"),
+		mcp.NewResourceTemplate("zentao://projects/{projectId}/stories", "ZenTao Project Stories"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually
+			// Extract project ID from URI manually
 			uri := request.Params.URI
-			id := extractIDFromURI(uri, "projects")
-
-			if id == "" {
-				return nil, fmt.Errorf("project ID not found in URI: %s", uri)
+			// For URI like zentao://projects/123/stories, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "projects" || parts[2] != "stories" {
+				return nil, fmt.Errorf("invalid project stories URI format: %s", uri)
 			}
+			id := parts[1]
 
 			resp, err := client.Get(fmt.Sprintf("/projects/%s/stories", id))
 			if err != nil {
