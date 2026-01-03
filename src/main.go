@@ -246,8 +246,11 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering bi tools", nil)
 	tools.RegisterBiTools(s, ztClient)
 
+	logger.Debug("server", "Registering tree tools", nil)
+	tools.RegisterTreeTools(s, ztClient)
+
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 518,
+		"total_tools": 531,
 	})
 }
 

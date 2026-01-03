@@ -55,7 +55,7 @@ The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is an open 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
-- [Tools Reference](#tools-400-total)
+ - [Tools Reference](#tools-531-total)
 - [Resources Reference](#resources-46-total--100-templates)
 - [Prompts](#prompts-2-total)
 - [Usage Examples](#usage-examples)
@@ -453,10 +453,18 @@ The server provides comprehensive tools for managing all aspects of ZenTao. Here
  - Prompts: `get_prompts`, `create_prompt`, `edit_prompt`, `delete_prompt`, `execute_prompt`, `publish_prompt`
  - Prompt Configuration: `assign_prompt_role`, `select_prompt_data_source`, `set_prompt_purpose`, `set_prompt_target_form`, `finalize_prompt`
  - Prompt Execution: `reset_prompt_execution`, `audit_prompt`, `get_testing_location`
- - Role Templates: `get_role_templates`
- - And more...
- 
- ### Zanode - Node Management (27 tools)
+- Role Templates: `get_role_templates`
+- And more...
+
+### Tree (13 tools)
+- Browse: `tree_browse`, `tree_browse_task`
+- Edit & Fix: `tree_edit`, `tree_fix`
+- Management: `tree_update_order`, `tree_manage_child`, `tree_delete`, `tree_view_history`
+- Menus: `tree_ajax_get_option_menu`, `tree_ajax_get_drop_menu`
+- Modules: `tree_ajax_get_modules`, `tree_ajax_get_son_modules`
+- Create: `tree_ajax_create_module`
+
+### Zanode - Node Management (27 tools)
  - Node Management: `browse_zanodes`, `create_zanode`, `edit_zanode`, `view_zanode`, `get_zanodes`
  - Lifecycle: `start_zanode`, `close_zanode`, `suspend_zanode`, `reboot_zanode`, `resume_zanode`, `destroy_zanode`
  - VNC: `get_zanode_vnc` - Get VNC access
