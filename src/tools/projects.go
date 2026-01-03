@@ -166,6 +166,49 @@ func RegisterProjectTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		return mcp.NewToolResultText(string(resp)), nil
 	})
 
+	getProjectStoriesTool := mcp.NewTool("get_project_stories",
+		mcp.WithDescription("Get stories for a specific project"),
+		mcp.WithNumber("project_id",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of stories to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getProjectStoriesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		projectID := int(args["project_id"].(float64))
+
+		params := make(map[string]string)
+		if v, ok := args["limit"]; ok && v != nil {
+			params["limit"] = fmt.Sprintf("%d", int(v.(float64)))
+		}
+		if v, ok := args["offset"]; ok && v != nil {
+			params["offset"] = fmt.Sprintf("%d", int(v.(float64)))
+		}
+
+		queryString := ""
+		if len(params) > 0 {
+			queryString = "?"
+			for k, v := range params {
+				queryString += fmt.Sprintf("%s=%s&", k, v)
+			}
+			queryString = queryString[:len(queryString)-1] // Remove trailing &
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/projects/%d/stories%s", projectID, queryString))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project stories: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
 	deleteProjectTool := mcp.NewTool("delete_project",
 		mcp.WithDescription("Delete a project from ZenTao"),
 		mcp.WithNumber("id",
@@ -274,6 +317,145 @@ func RegisterProjectTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		resp, err := client.Post(fmt.Sprintf("/projects/%d/executions", int(args["project"].(float64))), body)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create execution: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	updateExecutionTool := mcp.NewTool("update_execution",
+		mcp.WithDescription("Update an execution (sprint/iteration) in ZenTao"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Execution ID"),
+		),
+		mcp.WithString("name",
+			mcp.Description("Execution name"),
+		),
+		mcp.WithString("code",
+			mcp.Description("Execution code"),
+		),
+		mcp.WithString("begin",
+			mcp.Description("Planned start date (YYYY-MM-DD)"),
+		),
+		mcp.WithString("end",
+			mcp.Description("Planned end date (YYYY-MM-DD)"),
+		),
+		mcp.WithNumber("days",
+			mcp.Description("Available workdays"),
+		),
+		mcp.WithString("lifetime",
+			mcp.Description("Type (short|long|ops)"),
+			mcp.Enum("short", "long", "ops"),
+		),
+		mcp.WithString("PO",
+			mcp.Description("Product Owner"),
+		),
+		mcp.WithString("PM",
+			mcp.Description("Iteration Manager"),
+		),
+		mcp.WithString("QD",
+			mcp.Description("Quality Director"),
+		),
+		mcp.WithString("RD",
+			mcp.Description("Release Director"),
+		),
+		mcp.WithArray("teamMembers",
+			mcp.Description("Team members"),
+		),
+		mcp.WithString("desc",
+			mcp.Description("Iteration description"),
+		),
+	)
+
+	s.AddTool(updateExecutionTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		body := map[string]interface{}{}
+
+		if v, ok := args["name"]; ok && v != nil {
+			body["name"] = v
+		}
+		if v, ok := args["code"]; ok && v != nil {
+			body["code"] = v
+		}
+		if v, ok := args["begin"]; ok && v != nil {
+			body["begin"] = v
+		}
+		if v, ok := args["end"]; ok && v != nil {
+			body["end"] = v
+		}
+		if v, ok := args["days"]; ok && v != nil {
+			body["days"] = int(v.(float64))
+		}
+		if v, ok := args["lifetime"]; ok && v != nil {
+			body["lifetime"] = v
+		}
+		if v, ok := args["PO"]; ok && v != nil {
+			body["PO"] = v
+		}
+		if v, ok := args["PM"]; ok && v != nil {
+			body["PM"] = v
+		}
+		if v, ok := args["QD"]; ok && v != nil {
+			body["QD"] = v
+		}
+		if v, ok := args["RD"]; ok && v != nil {
+			body["RD"] = v
+		}
+		if v, ok := args["teamMembers"]; ok && v != nil {
+			body["teamMembers"] = v
+		}
+		if v, ok := args["desc"]; ok && v != nil {
+			body["desc"] = v
+		}
+
+		resp, err := client.Put(fmt.Sprintf("/executions/%d", id), body)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to update execution: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	getExecutionStoriesTool := mcp.NewTool("get_execution_stories",
+		mcp.WithDescription("Get stories for a specific execution (sprint)"),
+		mcp.WithNumber("execution_id",
+			mcp.Required(),
+			mcp.Description("Execution ID"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of stories to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getExecutionStoriesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		executionID := int(args["execution_id"].(float64))
+
+		params := make(map[string]string)
+		if v, ok := args["limit"]; ok && v != nil {
+			params["limit"] = fmt.Sprintf("%d", int(v.(float64)))
+		}
+		if v, ok := args["offset"]; ok && v != nil {
+			params["offset"] = fmt.Sprintf("%d", int(v.(float64)))
+		}
+
+		queryString := ""
+		if len(params) > 0 {
+			queryString = "?"
+			for k, v := range params {
+				queryString += fmt.Sprintf("%s=%s&", k, v)
+			}
+			queryString = queryString[:len(queryString)-1] // Remove trailing &
+		}
+
+		resp, err := client.Get(fmt.Sprintf("/executions/%d/stories%s", executionID, queryString))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get execution stories: %v", err)), nil
 		}
 
 		return mcp.NewToolResultText(string(resp)), nil

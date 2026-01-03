@@ -223,6 +223,20 @@ func RegisterUserTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		return mcp.NewToolResultText(string(resp)), nil
 	})
 
+	// Get current user profile tool
+	getMyProfileTool := mcp.NewTool("get_my_profile",
+		mcp.WithDescription("Get current user's profile information"),
+	)
+
+	s.AddTool(getMyProfileTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		resp, err := client.Get("/user")
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get user profile: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
 	// Get user details tool
 	getUserTool := mcp.NewTool("get_user",
 		mcp.WithDescription("Get details of a specific user by ID"),
