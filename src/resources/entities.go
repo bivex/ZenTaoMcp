@@ -256,7 +256,7 @@ func RegisterUserResources(s *server.MCPServer, client *client.ZenTaoClient) {
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://user/{id}", "ZenTao User Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually since MCP library may not populate Arguments
+			// Extract ID from URI manually
 			uri := request.Params.URI
 			id := extractIDFromURI(uri, "user")
 

@@ -61,7 +61,7 @@ func RegisterProductResources(s *server.MCPServer, client *client.ZenTaoClient) 
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://product/{id}", "ZenTao Product Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			// Extract ID from URI manually
+			// Extract ID from URI manually (MCP Arguments may not be populated)
 			uri := request.Params.URI
 			id := extractIDFromURI(uri, "product")
 

@@ -432,17 +432,18 @@ The server exposes the following resources for data access:
 - `zentao://testtasks` - List all test tasks (empty but functional)
 - `zentao://bugs` - List all bugs (rich data)
 
-#### ✅ Working Individual Item Resources
-- `zentao://product/123` - Get specific product details
-- `zentao://project/123` - Get specific project details
-- `zentao://story/123` - Get specific story details
-- `zentao://task/123` - Get specific task details
-- `zentao://bug/123` - Get specific bug details
-- `zentao://testtask/123` - Get specific test task details
-- `zentao://program/123` - Get specific program details
-- `zentao://build/123` - Get specific build details
-- `zentao://plan/123` - Get specific plan details
-- `zentao://execution/123` - Get specific execution details
+#### ✅ Working Individual Item Resources (URI Templates)
+- `zentao://product/{id}` - Get specific product details (e.g., `zentao://product/2`)
+- `zentao://project/{id}` - Get specific project details (e.g., `zentao://project/1`)
+- `zentao://story/{id}` - Get specific story details (e.g., `zentao://story/1`)
+- `zentao://task/{id}` - Get specific task details (e.g., `zentao://task/1`)
+- `zentao://bug/{id}` - Get specific bug details (e.g., `zentao://bug/1`)
+- `zentao://user/{id}` - Get specific user details (e.g., `zentao://user/1`)
+- `zentao://testtask/{id}` - Get specific test task details (e.g., `zentao://testtask/1`)
+- `zentao://program/{id}` - Get specific program details (e.g., `zentao://program/3`)
+- `zentao://build/{id}` - Get specific build details (e.g., `zentao://build/1`)
+- `zentao://plan/{id}` - Get specific plan details (e.g., `zentao://plan/1`)
+- `zentao://execution/{id}` - Get specific execution details (e.g., `zentao://execution/1`)
 
 #### ✅ Working Scoped List Resources
 - `zentao://projects/123/executions` - Executions for a specific project
