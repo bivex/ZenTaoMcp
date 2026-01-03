@@ -9,7 +9,7 @@
 
 ## Overview
 
-**ZenTao MCP Server** is a comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides seamless integration between AI assistants and the [ZenTao](https://www.zentao.net/) project management system. Built with Go, this server exposes **304 tools**, **42 resources**, and **2 prompts** covering all major ZenTao modules including products, projects, user stories, tasks, bugs, test cases, releases, builds, and more.
+**ZenTao MCP Server** is a comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides seamless integration between AI assistants and the [ZenTao](https://www.zentao.net/) project management system. Built with Go, this server exposes **400 tools**, **46 resources**, and **2 prompts** covering all major ZenTao modules including products, projects, user stories, tasks, bugs, test cases, releases, builds, and more.
 
 ### What is ZenTao?
 
@@ -21,9 +21,9 @@ The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is an open 
 
 ## Key Features
 
-- **🚀 304 MCP Tools** - Complete CRUD operations for all ZenTao entities (products, projects, stories, tasks, bugs, users, AI features, and more)
-- **📦 42 MCP Resources** - URI-based data access with RESTful resource patterns
-- **🔧 96 Resource Templates** - Dynamic resource access with parameterized URIs
+- **🚀 400 MCP Tools** - Complete CRUD operations for all ZenTao entities (products, projects, stories, tasks, bugs, users, AI features, and more)
+- **📦 46 MCP Resources** - URI-based data access with RESTful resource patterns
+- **🔧 100 Resource Templates** - Dynamic resource access with parameterized URIs
 - **💡 2 MCP Prompts** - Guided workflows for common operations (product creation, story creation)
 - **🔐 Authentication Support** - App-based and session-based authentication methods
 - **📊 Full API Coverage** - Supports all ZenTao modules including:
@@ -31,8 +31,12 @@ The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is an open 
   - Project Management & Executions
   - User Stories & Requirements
   - Task Management
-  - Bug Tracking
-  - Test Case Management
+  - Bug Tracking (Enhanced with batch operations)
+  - Test Case Management (Enhanced with scenes, import/export)
+  - Test Task Management (Enhanced with execution, results)
+  - Case Library Management
+  - Test Report Generation
+  - Test Suite Management
   - Build & Release Management
   - Kanban Boards
   - AI Integration (ZAI)
@@ -46,8 +50,8 @@ The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is an open 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
-- [Tools Reference](#tools-304-total)
-- [Resources Reference](#resources-42-total--96-templates)
+- [Tools Reference](#tools-400-total)
+- [Resources Reference](#resources-46-total--100-templates)
 - [Prompts](#prompts-2-total)
 - [Usage Examples](#usage-examples)
 - [API Documentation](#api-documentation)
@@ -125,7 +129,7 @@ export ZENTAO_AUTH_METHOD="session"
 # Then use zentao_login_session tool with account/password
 ```
 
-## Tools (304 Total)
+## Tools (400 Total)
 
 The server provides comprehensive tools for managing all aspects of ZenTao. Here's a categorized overview:
 
@@ -182,25 +186,65 @@ The server provides comprehensive tools for managing all aspects of ZenTao. Here
 - `assign_task` - Assign task to user
 - And more...
 
-### Bugs (15+ tools)
+### Bugs (35+ tools)
 - `create_bug` - Create a new bug
-- `edit_bug` - Edit an existing bug
-- `view_bug` - View bug details
-- `resolve_bug` - Resolve a bug
-- `close_bug` - Close a bug
+- `update_bug` - Update an existing bug
+- `browse_bugs` - Browse bugs with filtering and pagination
+- `get_bug` - Get bug details
 - `assign_bug` - Assign bug to user
+- `confirm_bug` - Confirm a bug
+- `resolve_bug` - Resolve a bug
+- `activate_bug` - Activate a closed bug
+- `close_bug` - Close a bug
+- `delete_bug` - Delete a bug
+- `export_bugs` - Export bugs to file
+- `report_bugs` - Generate bug report
+- `link_bugs` - Link related bugs
+- `confirm_bug_story_change` - Confirm story change for a bug
+- Batch operations: `batch_create_bugs`, `batch_edit_bugs`, `batch_change_bug_branch`, `batch_change_bug_module`, `batch_change_bug_plan`, `batch_assign_bugs`, `batch_confirm_bugs`, `batch_resolve_bugs`, `batch_close_bugs`, `batch_activate_bugs`
 - And more...
 
-### Test Cases (10+ tools)
+### Test Cases (30+ tools)
 - `create_testcase` - Create a new test case
-- `edit_testcase` - Edit an existing test case
+- `update_testcase` - Update an existing test case
+- `browse_testcases` - Browse test cases with filtering
 - `view_testcase` - View test case details
 - `delete_testcase` - Delete a test case
+- `review_testcase` - Review a test case
+- `create_bug_from_testcase` - Create a bug from a test case
+- `link_testcases` - Link related test cases
+- `link_bugs_to_testcase` - Link bugs to a test case
+- Batch operations: `batch_create_testcases`, `batch_edit_testcases`, `batch_delete_testcases`, `batch_review_testcases`, `batch_change_testcase_branch`, `batch_change_testcase_module`, `batch_change_testcase_type`
+- Import/Export: `export_testcases`, `export_testcase_template`, `import_testcases`, `import_testcases_from_lib`, `import_testcase_to_lib`
+- Scene management: `browse_testcase_scenes`, `create_testcase_scene`, `edit_testcase_scene`, `delete_testcase_scene`
+- Analysis: `group_testcases`, `get_zero_testcases`
 - And more...
 
-### Test Tasks (3 tools)
+### Test Tasks (20+ tools)
+- `create_testtask` - Create a new test task
 - `get_testtasks` - Get list of test tasks
+- `browse_testtasks` - Browse test tasks with filtering
 - `get_testtask` - Get test task details
+- `edit_testtask` - Edit an existing test task
+- `start_testtask` - Start a test task
+- `close_testtask` - Close a test task
+- `block_testtask` - Block a test task
+- `activate_testtask` - Activate a blocked test task
+- `delete_testtask` - Delete a test task
+- `get_testtask_cases` - Get test cases for a test task
+- `get_testtask_unit_cases` - Get unit test cases for a test task
+- `link_case_to_testtask` - Link test case to test task
+- `unlink_case_from_testtask` - Unlink test case from test task
+- `batch_unlink_cases_from_testtask` - Unlink multiple test cases
+- `run_testcase` - Run a test case in test task
+- `batch_run_testcases` - Run multiple test cases
+- `get_testtask_results` - Get test results for a test task
+- `assign_testcase` - Assign test case to user
+- `batch_assign_testcases` - Assign multiple test cases
+- `report_testtask` - Generate test task report
+- `group_testtask_cases` - Group test cases in test task
+- `browse_testtask_units` - Browse unit test tasks
+- `import_unit_test_result` - Import unit test result
 - `get_project_testtasks` - Get test tasks for a project
 
 ### Plans (10+ tools)
@@ -417,7 +461,45 @@ The server provides comprehensive tools for managing all aspects of ZenTao. Here
 - ZTF Scripts: `get_zanode_ztf_script`, `run_zanode_ztf_script`
 - Instructions: `get_zanode_instructions`
 
-## Resources (42 Total + 96 Templates)
+### Case Library (15 tools)
+- `get_caselib_index` - Get case library index
+- `create_caselib` - Create a new case library
+- `edit_caselib` - Edit an existing case library
+- `delete_caselib` - Delete a case library
+- `browse_caselib` - Browse case library with filtering
+- `view_caselib` - View case library details
+- `create_caselib_case` - Create a new test case in case library
+- `batch_create_caselib_cases` - Create multiple test cases
+- `edit_caselib_case` - Edit a test case in case library
+- `batch_edit_caselib_cases` - Edit multiple test cases
+- `view_caselib_case` - View test case details in case library
+- `export_caselib_template` - Export import template
+- `import_caselib_cases` - Import test cases to case library
+- `show_caselib_import` - Show import preview
+- `export_caselib_cases` - Export test cases from case library
+
+### QA (1 tool)
+- `get_qa_index` - Get QA module index
+
+### Test Report (5 tools)
+- `browse_testreports` - Browse test reports with filtering
+- `create_testreport` - Create a new test report
+- `edit_testreport` - Edit an existing test report
+- `view_testreport` - View test report details
+- `delete_testreport` - Delete a test report
+
+### Test Suite (9 tools)
+- `get_testsuite_index` - Get test suite index
+- `browse_testsuites` - Browse test suites with filtering
+- `create_testsuite` - Create a new test suite
+- `view_testsuite` - View test suite details
+- `edit_testsuite` - Edit an existing test suite
+- `delete_testsuite` - Delete a test suite
+- `link_case_to_testsuite` - Link test case to test suite
+- `unlink_case_from_testsuite` - Unlink test case from test suite
+- `batch_unlink_cases_from_testsuite` - Unlink multiple test cases
+
+## Resources (46 Total + 100 Templates)
 
 Resources provide URI-based access to ZenTao data. All resources follow the pattern `zentao://{entity}/{id}` or `zentao://{entity}/{id}/{subentity}`.
 
@@ -598,6 +680,23 @@ Resources provide URI-based access to ZenTao data. All resources follow the patt
 - `zentao://zanode/hosts/{hostID}/images` - Host images list
 - `zentao://zanode/hosts/{hostID}/services` - Host service status
 - `zentao://zanode/images/{imageID}` - Image details
+
+### Case Library
+- `zentao://caselibs` - List of all case libraries
+- `zentao://caselibs/{libID}` - Individual case library details
+- `zentao://caselibs/{libID}/cases` - Test cases in a case library
+- `zentao://caselibs/{libID}/cases/{caseID}` - Individual test case in case library
+
+### QA
+- `zentao://qa` - QA module index
+
+### Test Report
+- `zentao://testreports/{reportID}` - Individual test report details
+- `zentao://{objectType}/{objectID}/testreports` - Test reports for a project, execution, or product
+
+### Test Suite
+- `zentao://testsuites/{suiteID}` - Individual test suite details
+- `zentao://products/{productID}/testsuites` - Test suites for a product
 
 ## Prompts (2 Total)
 
