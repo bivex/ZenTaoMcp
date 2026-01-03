@@ -240,8 +240,14 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering admin tools", nil)
 	tools.RegisterAdminTools(s, ztClient)
 
+	logger.Debug("server", "Registering aiapp tools", nil)
+	tools.RegisterAiappTools(s, ztClient)
+
+	logger.Debug("server", "Registering bi tools", nil)
+	tools.RegisterBiTools(s, ztClient)
+
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 505,
+		"total_tools": 518,
 	})
 }
 
