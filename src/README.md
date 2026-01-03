@@ -203,6 +203,71 @@ The server will communicate via stdio, following the MCP protocol.
 - `zentao_login_session` - Authenticate with ZenTao using username/password (session-based)
 
 ### Products
+- `get_products` - List all products with optional filters
+- `get_product` - Get details of a specific product by ID
+- `create_product` - Create a new product
+- `update_product` - Update an existing product
+- `delete_product` - Delete a product
+
+### Projects & Executions
+- `get_projects` - List all projects with optional filters
+- `get_project` - Get details of a specific project by ID
+- `create_project` - Create a new project
+- `update_project` - Update an existing project
+- `delete_project` - Delete a project
+- `get_executions` - List all executions (sprints/iterations)
+- `get_execution` - Get details of a specific execution by ID
+- `create_execution` - Create a new execution
+- `delete_execution` - Delete an execution
+
+### Stories
+- `get_stories` - List all user stories with optional filters
+- `get_story` - Get details of a specific story by ID
+- `create_story` - Create a new user story
+- `update_story` - Update an existing story
+- `change_story` - Change story content and specifications
+- `delete_story` - Delete a story
+
+### Tasks
+- `get_tasks` - List all tasks with optional filters
+- `get_task` - Get details of a specific task by ID
+- `create_task` - Create a new task
+- `update_task` - Update an existing task
+- `delete_task` - Delete a task
+
+### Bugs
+- `get_bugs` - List all bugs with optional filters
+- `get_bug` - Get details of a specific bug by ID
+- `create_bug` - Create a new bug
+- `update_bug` - Update an existing bug
+- `delete_bug` - Delete a bug
+
+### Builds
+- `get_builds` - List all builds with optional filters
+- `get_build` - Get details of a specific build by ID
+- `create_build` - Create a new build
+- `update_build` - Update an existing build
+- `delete_build` - Delete a build
+
+### Plans
+- `get_plans` - List all product plans with optional filters
+- `get_plan` - Get details of a specific plan by ID
+- `create_plan` - Create a new product plan
+- `update_plan` - Update an existing plan
+- `delete_plan` - Delete a plan
+- `link_stories_to_plan` - Link stories to a product plan
+- `unlink_stories_from_plan` - Unlink stories from a product plan
+- `link_bugs_to_plan` - Link bugs to a product plan
+- `unlink_bugs_from_plan` - Unlink bugs from a product plan
+
+### Users
+- `get_users` - List all users with optional filters
+- `get_user` - Get details of a specific user by ID
+- `create_user` - Create a new user
+- `update_user` - Update an existing user
+- `delete_user` - Delete a user
+
+### Products
 - `create_product` - Create a new product
 - `update_product` - Update existing product
 - `delete_product` - Delete a product
@@ -305,6 +370,38 @@ The server exposes the following resources for data access:
   "arguments": {
     "account": "admin",
     "password": "your-password"
+  }
+}
+```
+
+### Get/List Operations
+```json
+{
+  "tool": "get_products",
+  "arguments": {
+    "status": "normal",
+    "limit": 50
+  }
+}
+```
+
+```json
+{
+  "tool": "get_bugs",
+  "arguments": {
+    "product": 1,
+    "status": "active"
+  }
+}
+```
+
+```json
+{
+  "tool": "get_stories",
+  "arguments": {
+    "product": 1,
+    "status": "active",
+    "pri": 3
   }
 }
 ```

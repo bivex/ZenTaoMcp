@@ -298,4 +298,180 @@ func RegisterProjectTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return mcp.NewToolResultText(string(resp)), nil
 	})
+
+	// Get projects list tool
+	getProjectsTool := mcp.NewTool("get_projects",
+		mcp.WithDescription("Get list of projects in ZenTao"),
+		mcp.WithString("status",
+			mcp.Description("Filter by project status"),
+			mcp.Enum("wait", "doing", "suspended", "closed"),
+		),
+		mcp.WithNumber("program",
+			mcp.Description("Filter by program ID"),
+		),
+		mcp.WithString("model",
+			mcp.Description("Filter by project model"),
+			mcp.Enum("scrum", "agileplus", "waterfall", "kanban"),
+		),
+		mcp.WithNumber("PM",
+			mcp.Description("Filter by project manager ID"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of projects to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getProjectsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if status, ok := args["status"].(string); ok && status != "" {
+			params["status"] = status
+		}
+		if program, ok := args["program"].(float64); ok && program > 0 {
+			params["program"] = fmt.Sprintf("%.0f", program)
+		}
+		if model, ok := args["model"].(string); ok && model != "" {
+			params["model"] = model
+		}
+		if pm, ok := args["PM"].(float64); ok && pm > 0 {
+			params["PM"] = fmt.Sprintf("%.0f", pm)
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/projects"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get projects: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get project details tool
+	getProjectTool := mcp.NewTool("get_project",
+		mcp.WithDescription("Get details of a specific project by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Project ID"),
+		),
+	)
+
+	s.AddTool(getProjectTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/project/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get project: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get executions list tool
+	getExecutionsTool := mcp.NewTool("get_executions",
+		mcp.WithDescription("Get list of executions (sprints/iterations) in ZenTao"),
+		mcp.WithNumber("project",
+			mcp.Description("Filter by project ID"),
+		),
+		mcp.WithString("status",
+			mcp.Description("Filter by execution status"),
+			mcp.Enum("wait", "doing", "suspended", "closed"),
+		),
+		mcp.WithString("type",
+			mcp.Description("Filter by execution type"),
+			mcp.Enum("sprint", "stage", "kanban"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of executions to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getExecutionsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if project, ok := args["project"].(float64); ok && project > 0 {
+			params["project"] = fmt.Sprintf("%.0f", project)
+		}
+		if status, ok := args["status"].(string); ok && status != "" {
+			params["status"] = status
+		}
+		if execType, ok := args["type"].(string); ok && execType != "" {
+			params["type"] = execType
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/executions"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get executions: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get execution details tool
+	getExecutionTool := mcp.NewTool("get_execution",
+		mcp.WithDescription("Get details of a specific execution by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Execution ID"),
+		),
+	)
+
+	s.AddTool(getExecutionTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/execution/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get execution: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
 }

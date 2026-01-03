@@ -223,4 +223,107 @@ func RegisterStoryTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return mcp.NewToolResultText(string(resp)), nil
 	})
+
+	// Get stories list tool
+	getStoriesTool := mcp.NewTool("get_stories",
+		mcp.WithDescription("Get list of user stories in ZenTao"),
+		mcp.WithNumber("product",
+			mcp.Description("Filter by product ID"),
+		),
+		mcp.WithNumber("project",
+			mcp.Description("Filter by project ID"),
+		),
+		mcp.WithNumber("execution",
+			mcp.Description("Filter by execution ID"),
+		),
+		mcp.WithString("status",
+			mcp.Description("Filter by story status"),
+			mcp.Enum("draft", "active", "changed", "closed"),
+		),
+		mcp.WithString("stage",
+			mcp.Description("Filter by story stage"),
+			mcp.Enum("wait", "planned", "projected", "developing", "developed", "testing", "tested", "verified", "released", "closed"),
+		),
+		mcp.WithNumber("pri",
+			mcp.Description("Filter by priority (1-9)"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of stories to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getStoriesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if product, ok := args["product"].(float64); ok && product > 0 {
+			params["product"] = fmt.Sprintf("%.0f", product)
+		}
+		if project, ok := args["project"].(float64); ok && project > 0 {
+			params["project"] = fmt.Sprintf("%.0f", project)
+		}
+		if execution, ok := args["execution"].(float64); ok && execution > 0 {
+			params["execution"] = fmt.Sprintf("%.0f", execution)
+		}
+		if status, ok := args["status"].(string); ok && status != "" {
+			params["status"] = status
+		}
+		if stage, ok := args["stage"].(string); ok && stage != "" {
+			params["stage"] = stage
+		}
+		if pri, ok := args["pri"].(float64); ok && pri > 0 && pri <= 9 {
+			params["pri"] = fmt.Sprintf("%.0f", pri)
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/stories"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get stories: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get story details tool
+	getStoryTool := mcp.NewTool("get_story",
+		mcp.WithDescription("Get details of a specific story by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Story ID"),
+		),
+	)
+
+	s.AddTool(getStoryTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/story/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get story: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
 }

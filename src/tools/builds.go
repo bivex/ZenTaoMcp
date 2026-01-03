@@ -174,4 +174,99 @@ func RegisterBuildTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return mcp.NewToolResultText(string(resp)), nil
 	})
+
+	// Get builds list tool
+	getBuildsTool := mcp.NewTool("get_builds",
+		mcp.WithDescription("Get list of builds in ZenTao"),
+		mcp.WithNumber("product",
+			mcp.Description("Filter by product ID"),
+		),
+		mcp.WithNumber("project",
+			mcp.Description("Filter by project ID"),
+		),
+		mcp.WithNumber("execution",
+			mcp.Description("Filter by execution ID"),
+		),
+		mcp.WithString("builder",
+			mcp.Description("Filter by builder username"),
+		),
+		mcp.WithString("date",
+			mcp.Description("Filter by build date (YYYY-MM-DD)"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of builds to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getBuildsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if product, ok := args["product"].(float64); ok && product > 0 {
+			params["product"] = fmt.Sprintf("%.0f", product)
+		}
+		if project, ok := args["project"].(float64); ok && project > 0 {
+			params["project"] = fmt.Sprintf("%.0f", project)
+		}
+		if execution, ok := args["execution"].(float64); ok && execution > 0 {
+			params["execution"] = fmt.Sprintf("%.0f", execution)
+		}
+		if builder, ok := args["builder"].(string); ok && builder != "" {
+			params["builder"] = builder
+		}
+		if date, ok := args["date"].(string); ok && date != "" {
+			params["date"] = date
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/builds"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get builds: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get build details tool
+	getBuildTool := mcp.NewTool("get_build",
+		mcp.WithDescription("Get details of a specific build by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Build ID"),
+		),
+	)
+
+	s.AddTool(getBuildTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/build/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get build: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
 }
