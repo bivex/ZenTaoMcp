@@ -1,3 +1,15 @@
+// Copyright (c) 2026 Bivex
+//
+// Author: Bivex
+// Contact: support@b-b.top
+//
+// For up-to-date contact information:
+// https://github.com/bivex
+//
+//
+// Licensed under the MIT License.
+// Commercial licensing available upon request.
+
 package client
 
 import (
