@@ -5,7 +5,8 @@
 [![ZenTao](https://img.shields.io/badge/ZenTao-21.7.7-blue)](https://www.zentao.net/)
 [![MCP](https://img.shields.io/badge/MCP-Protocol-green)](https://modelcontextprotocol.io/)
 
-<img width="727" height="575" alt="ZenTao MCP Server Architecture" src="https://github.com/user-attachments/assets/7c26eb36-550b-47d6-b007-2d2cb2c3aa0a" />
+<img width="1005" height="942" alt="image" src="https://github.com/user-attachments/assets/506b136a-2c26-4df3-89d1-b74ccf079656" />
+
 
 ## Overview
 
