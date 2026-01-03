@@ -142,39 +142,4 @@ func RegisterZaiTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		return mcp.NewToolResultText(string(resp)), nil
 	})
 
-	getAiModelsTool := mcp.NewTool("get_ai_models",
-		mcp.WithDescription("Get available AI models in ZenTao AI"),
-	)
-
-	s.AddTool(getAiModelsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		resp, err := client.Get("/index.php?m=zai&f=models&t=json")
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get AI models: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(string(resp)), nil
-	})
-
-	testAiConnectionTool := mcp.NewTool("test_ai_connection",
-		mcp.WithDescription("Test connection to AI services"),
-		mcp.WithString("model",
-			mcp.Description("Specific AI model to test"),
-		),
-	)
-
-	s.AddTool(testAiConnectionTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		args := request.GetArguments()
-
-		queryParams := ""
-		if v, ok := args["model"]; ok && v != nil {
-			queryParams = fmt.Sprintf("&model=%s", v)
-		}
-
-		resp, err := client.Get(fmt.Sprintf("/index.php?m=zai&f=testConnection&t=json%s", queryParams))
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to test AI connection: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(string(resp)), nil
-	})
 }

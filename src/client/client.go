@@ -176,6 +176,18 @@ func (c *ZenTaoClient) convertRESTPath(method, path string) (string, map[string]
 		path = path[1:]
 	}
 
+	// Check if this is already a full ZenTao URL (starts with index.php?)
+	if strings.HasPrefix(path, "index.php?") {
+		// Return as-is, but ensure it starts with ?
+		if !strings.HasPrefix(path, "?") {
+			path = "?" + strings.TrimPrefix(path, "index.php?")
+		}
+		logger.Debug("client", "Detected full ZenTao URL, using as-is", map[string]interface{}{
+			"path": path,
+		})
+		return path, params
+	}
+
 	// Parse path components
 	var module, function, id, subResource, originalResource string
 	var parts []string
@@ -768,6 +780,14 @@ func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
 			authAdded = true
 		}
 		c.sessionMutex.Unlock()
+	}
+
+	// Ensure t=json parameter is always present for JSON API responses
+	if params == nil {
+		params = make(map[string]string)
+	}
+	if _, exists := params["t"]; !exists {
+		params["t"] = "json"
 	}
 
 	finalURL := baseURL + path

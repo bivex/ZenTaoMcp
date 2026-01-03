@@ -180,9 +180,6 @@ func registerTools(s *server.MCPServer) {
 	logger.Debug("server", "Registering personnel tools", nil)
 	tools.RegisterPersonnelTools(s, ztClient)
 
-	logger.Debug("server", "Registering program tools", nil)
-	tools.RegisterProgramTools(s, ztClient)
-
 	logger.Debug("server", "Registering stakeholder tools", nil)
 	tools.RegisterStakeholderTools(s, ztClient)
 
@@ -194,9 +191,6 @@ func registerTools(s *server.MCPServer) {
 
 	logger.Debug("server", "Registering projectbuild tools", nil)
 	tools.RegisterProjectBuildTools(s, ztClient)
-
-	logger.Debug("server", "Registering build tools", nil)
-	tools.RegisterBuildTools(s, ztClient)
 
 	logger.Debug("server", "Registering execution tools", nil)
 	tools.RegisterExecutionTools(s, ztClient)
@@ -223,7 +217,7 @@ func registerTools(s *server.MCPServer) {
 	tools.RegisterAiTools(s, ztClient)
 
 	logger.Info("server", "All tool registrations completed", map[string]interface{}{
-		"total_tools": 279,
+		"total_tools": 277,
 	})
 }
 
@@ -258,12 +252,6 @@ func registerResources(s *server.MCPServer) {
 	logger.Debug("server", "Registering plan resources", nil)
 	resources.RegisterPlanResources(s, ztClient)
 
-	logger.Debug("server", "Registering build resources", nil)
-	resources.RegisterBuildResources(s, ztClient)
-
-	logger.Debug("server", "Registering plan resources", nil)
-	resources.RegisterPlanResources(s, ztClient)
-
 	logger.Debug("server", "Registering release resources", nil)
 	resources.RegisterReleaseResources(s, ztClient)
 
@@ -287,9 +275,6 @@ func registerResources(s *server.MCPServer) {
 
 	logger.Debug("server", "Registering stakeholder resources", nil)
 	resources.RegisterStakeholderResources(s, ztClient)
-
-	logger.Debug("server", "Registering build resources", nil)
-	resources.RegisterBuildResources(s, ztClient)
 
 	logger.Debug("server", "Registering execution resources", nil)
 	resources.RegisterExecutionResources(s, ztClient)
@@ -316,7 +301,7 @@ func registerResources(s *server.MCPServer) {
 	resources.RegisterAiResources(s, ztClient)
 
 	logger.Info("server", "All resource registrations completed", map[string]interface{}{
-		"total_resources": 44,
+		"total_resources": 40,
 		"templates_registered": 88,
 		"note": "List resources + resource templates for individual/scoped access",
 	})
