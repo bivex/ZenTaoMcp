@@ -16,6 +16,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -54,29 +55,32 @@ func RegisterProductResources(s *server.MCPServer, client *client.ZenTaoClient) 
 		}, nil
 	})
 
-	productDetailResource := mcp.NewResource(
-		"zentao://products/{id}",
-		"ZenTao Product Details",
-		mcp.WithResourceDescription("Details of a specific product by ID (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+	// Register product detail resource template (URI templates are working)
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://product/{id}", "ZenTao Product Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI manually (MCP Arguments may not be populated)
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "product")
+
+			if id == "" {
+				return nil, fmt.Errorf("product ID not found in URI: %s", uri)
+			}
+
+			resp, err := client.Get(fmt.Sprintf("/products/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get product details: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
-
-	s.AddResource(productDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "products")
-
-		resp, err := client.Get(fmt.Sprintf("/products/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get product details: %w", err)
-		}
-
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
 }
 
 func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) {
@@ -102,75 +106,113 @@ func RegisterProjectResources(s *server.MCPServer, client *client.ZenTaoClient) 
 		}, nil
 	})
 
-	projectDetailResource := mcp.NewResource(
-		"zentao://projects/{id}",
-		"ZenTao Project Details",
-		mcp.WithResourceDescription("Details of a specific project by ID (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+	// Register project detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://project/{id}", "ZenTao Project Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "project")
+
+			if id == "" {
+				return nil, fmt.Errorf("project ID not found in URI: %s", uri)
+			}
+
+			resp, err := client.Get(fmt.Sprintf("/projects/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get project details: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
 
-	s.AddResource(projectDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "projects")
+	// Register project executions resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://projects/{projectId}/executions", "ZenTao Project Executions"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract project ID from URI manually
+			uri := request.Params.URI
+			// For URI like zentao://projects/123/executions, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "projects" || parts[2] != "executions" {
+				return nil, fmt.Errorf("invalid project executions URI format: %s", uri)
+			}
+			id := parts[1]
 
-		resp, err := client.Get(fmt.Sprintf("/projects/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get project details: %w", err)
-		}
+			resp, err := client.Get(fmt.Sprintf("/projects/%s/executions", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get project executions: %w", err)
+			}
 
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
-
-	projectExecutionsResource := mcp.NewResource(
-		"zentao://projects/{id}/executions",
-		"ZenTao Project Executions",
-		mcp.WithResourceDescription("Executions for a specific project (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
 
-	s.AddResource(projectExecutionsResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "projects")
+	// Register project stories resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://projects/{projectId}/stories", "ZenTao Project Stories"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract project ID from URI manually
+			uri := request.Params.URI
+			// For URI like zentao://projects/123/stories, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "projects" || parts[2] != "stories" {
+				return nil, fmt.Errorf("invalid project stories URI format: %s", uri)
+			}
+			id := parts[1]
 
-		resp, err := client.Get(fmt.Sprintf("/projects/%s/executions", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get project executions: %w", err)
-		}
+			resp, err := client.Get(fmt.Sprintf("/projects/%s/stories", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get project stories: %w", err)
+			}
 
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
-
-	projectStoriesResource := mcp.NewResource(
-		"zentao://projects/{id}/stories",
-		"ZenTao Project Stories",
-		mcp.WithResourceDescription("Stories for a specific project (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
 
-	s.AddResource(projectStoriesResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "projects")
+	// Register execution detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://execution/{id}", "ZenTao Execution Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "execution")
 
-		resp, err := client.Get(fmt.Sprintf("/projects/%s/stories", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get project stories: %w", err)
-		}
+			if id == "" {
+				return nil, fmt.Errorf("execution ID not found in URI: %s", uri)
+			}
 
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
+			resp, err := client.Get(fmt.Sprintf("/executions/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get execution details: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
+	)
 }

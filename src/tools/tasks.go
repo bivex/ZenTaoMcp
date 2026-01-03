@@ -207,4 +207,113 @@ func RegisterTaskTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return mcp.NewToolResultText(string(resp)), nil
 	})
+
+	// Get tasks list tool
+	getTasksTool := mcp.NewTool("get_tasks",
+		mcp.WithDescription("Get list of tasks in ZenTao"),
+		mcp.WithNumber("execution",
+			mcp.Description("Filter by execution ID"),
+		),
+		mcp.WithNumber("story",
+			mcp.Description("Filter by story ID"),
+		),
+		mcp.WithString("status",
+			mcp.Description("Filter by task status"),
+			mcp.Enum("wait", "doing", "done", "pause", "cancel", "closed"),
+		),
+		mcp.WithString("type",
+			mcp.Description("Filter by task type"),
+			mcp.Enum("design", "devel", "request", "test", "study", "discuss", "ui", "affair", "misc"),
+		),
+		mcp.WithNumber("assignedTo",
+			mcp.Description("Filter by assigned user ID"),
+		),
+		mcp.WithNumber("openedBy",
+			mcp.Description("Filter by opened by user ID"),
+		),
+		mcp.WithNumber("pri",
+			mcp.Description("Filter by priority (1-9)"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of tasks to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getTasksTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if execution, ok := args["execution"].(float64); ok && execution > 0 {
+			params["execution"] = fmt.Sprintf("%.0f", execution)
+		}
+		if story, ok := args["story"].(float64); ok && story > 0 {
+			params["story"] = fmt.Sprintf("%.0f", story)
+		}
+		if status, ok := args["status"].(string); ok && status != "" {
+			params["status"] = status
+		}
+		if taskType, ok := args["type"].(string); ok && taskType != "" {
+			params["type"] = taskType
+		}
+		if assignedTo, ok := args["assignedTo"].(float64); ok && assignedTo > 0 {
+			params["assignedTo"] = fmt.Sprintf("%.0f", assignedTo)
+		}
+		if openedBy, ok := args["openedBy"].(float64); ok && openedBy > 0 {
+			params["openedBy"] = fmt.Sprintf("%.0f", openedBy)
+		}
+		if pri, ok := args["pri"].(float64); ok && pri > 0 && pri <= 9 {
+			params["pri"] = fmt.Sprintf("%.0f", pri)
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/tasks"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get tasks: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get task details tool
+	getTaskTool := mcp.NewTool("get_task",
+		mcp.WithDescription("Get details of a specific task by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Task ID"),
+		),
+	)
+
+	s.AddTool(getTaskTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/task/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get task: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
 }

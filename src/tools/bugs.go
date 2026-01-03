@@ -266,4 +266,106 @@ func RegisterBugTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 		return mcp.NewToolResultText(string(resp)), nil
 	})
+
+	// Get bugs list tool
+	getBugsTool := mcp.NewTool("get_bugs",
+		mcp.WithDescription("Get list of bugs in ZenTao"),
+		mcp.WithNumber("product",
+			mcp.Description("Filter by product ID"),
+		),
+		mcp.WithNumber("project",
+			mcp.Description("Filter by project ID"),
+		),
+		mcp.WithNumber("execution",
+			mcp.Description("Filter by execution ID"),
+		),
+		mcp.WithString("status",
+			mcp.Description("Filter by bug status"),
+			mcp.Enum("active", "resolved", "closed"),
+		),
+		mcp.WithNumber("assignedTo",
+			mcp.Description("Filter by assigned user ID"),
+		),
+		mcp.WithNumber("openedBy",
+			mcp.Description("Filter by opened by user ID"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of bugs to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getBugsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if product, ok := args["product"].(float64); ok && product > 0 {
+			params["product"] = fmt.Sprintf("%.0f", product)
+		}
+		if project, ok := args["project"].(float64); ok && project > 0 {
+			params["project"] = fmt.Sprintf("%.0f", project)
+		}
+		if execution, ok := args["execution"].(float64); ok && execution > 0 {
+			params["execution"] = fmt.Sprintf("%.0f", execution)
+		}
+		if status, ok := args["status"].(string); ok && status != "" {
+			params["status"] = status
+		}
+		if assignedTo, ok := args["assignedTo"].(float64); ok && assignedTo > 0 {
+			params["assignedTo"] = fmt.Sprintf("%.0f", assignedTo)
+		}
+		if openedBy, ok := args["openedBy"].(float64); ok && openedBy > 0 {
+			params["openedBy"] = fmt.Sprintf("%.0f", openedBy)
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/bugs"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get bugs: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get bug details tool
+	getBugTool := mcp.NewTool("get_bug",
+		mcp.WithDescription("Get details of a specific bug by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Bug ID"),
+		),
+	)
+
+	s.AddTool(getBugTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/bug/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get bug: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
 }

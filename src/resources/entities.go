@@ -15,186 +15,269 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/zentao/mcp-server/client"
+	"github.com/zentao/mcp-server/logger"
 )
 
 func RegisterStoryResources(s *server.MCPServer, client *client.ZenTaoClient) {
-	productStoriesResource := mcp.NewResource(
-		"zentao://products/{id}/stories",
-		"ZenTao Product Stories",
-		mcp.WithResourceDescription("Stories for a specific product (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+	// Note: No general /stories endpoint in ZenTao API
+	// Stories are accessed via projects/products/executions
+
+	// Register product stories resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://products/{productId}/stories", "ZenTao Product Stories"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract product ID from URI manually
+			uri := request.Params.URI
+			// For URI like zentao://products/123/stories, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "products" || parts[2] != "stories" {
+				return nil, fmt.Errorf("invalid product stories URI format: %s", uri)
+			}
+			id := parts[1]
+
+			resp, err := client.Get(fmt.Sprintf("/products/%s/stories", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get product stories: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
 
-	s.AddResource(productStoriesResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "products")
+	// Register story detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://story/{id}", "ZenTao Story Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "story")
 
-		resp, err := client.Get(fmt.Sprintf("/products/%s/stories", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get product stories: %w", err)
-		}
+			if id == "" {
+				return nil, fmt.Errorf("story ID not found in URI: %s", uri)
+			}
 
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
+			resp, err := client.Get(fmt.Sprintf("/stories/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get story details: %w", err)
+			}
 
-	storyDetailResource := mcp.NewResource(
-		"zentao://stories/{id}",
-		"ZenTao Story Details",
-		mcp.WithResourceDescription("Details of a specific story by ID (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
-
-	s.AddResource(storyDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "stories")
-
-		resp, err := client.Get(fmt.Sprintf("/stories/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get story details: %w", err)
-		}
-
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
 }
 
 func RegisterTaskResources(s *server.MCPServer, client *client.ZenTaoClient) {
-	executionTasksResource := mcp.NewResource(
-		"zentao://executions/{id}/tasks",
-		"ZenTao Execution Tasks",
-		mcp.WithResourceDescription("Tasks for a specific execution (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+	// Note: No general /tasks endpoint in ZenTao API
+	// Tasks are accessed via executions
+
+	// Register execution tasks resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://executions/{executionId}/tasks", "ZenTao Execution Tasks"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract execution ID from URI manually
+			uri := request.Params.URI
+			// For URI like zentao://executions/123/tasks, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "executions" || parts[2] != "tasks" {
+				return nil, fmt.Errorf("invalid execution tasks URI format: %s", uri)
+			}
+			id := parts[1]
+
+			resp, err := client.Get(fmt.Sprintf("/executions/%s/tasks", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get execution tasks: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
 
-	s.AddResource(executionTasksResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "executions")
+	// Register task detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://task/{id}", "ZenTao Task Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "task")
 
-		resp, err := client.Get(fmt.Sprintf("/executions/%s/tasks", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get execution tasks: %w", err)
-		}
+			if id == "" {
+				return nil, fmt.Errorf("task ID not found in URI: %s", uri)
+			}
 
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
+			resp, err := client.Get(fmt.Sprintf("/tasks/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get task details: %w", err)
+			}
 
-	taskDetailResource := mcp.NewResource(
-		"zentao://tasks/{id}",
-		"ZenTao Task Details",
-		mcp.WithResourceDescription("Details of a specific task by ID (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
-
-	s.AddResource(taskDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "tasks")
-
-		resp, err := client.Get(fmt.Sprintf("/tasks/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get task details: %w", err)
-		}
-
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
 }
 
 func RegisterBugResources(s *server.MCPServer, client *client.ZenTaoClient) {
-	productBugsResource := mcp.NewResource(
-		"zentao://products/{id}/bugs",
-		"ZenTao Product Bugs",
-		mcp.WithResourceDescription("Bugs for a specific product (use ID in URI)"),
+	bugsListResource := mcp.NewResource(
+		"zentao://bugs",
+		"ZenTao Bugs List",
+		mcp.WithResourceDescription("List of all bugs in ZenTao"),
 		mcp.WithMIMEType("application/json"),
 	)
 
-	s.AddResource(productBugsResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "products")
-
-		resp, err := client.Get(fmt.Sprintf("/products/%s/bugs", id))
+	s.AddResource(bugsListResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+		resp, err := client.Get("/bugs")
 		if err != nil {
-			return nil, fmt.Errorf("failed to get product bugs: %w", err)
+			return nil, fmt.Errorf("failed to get bugs: %w", err)
 		}
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				URI:      request.Params.URI,
+				URI:      "zentao://bugs",
 				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
 	})
 
-	bugDetailResource := mcp.NewResource(
-		"zentao://bugs/{id}",
-		"ZenTao Bug Details",
-		mcp.WithResourceDescription("Details of a specific bug by ID (use ID in URI)"),
-		mcp.WithMIMEType("application/json"),
+	// Register product bugs resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://products/{productId}/bugs", "ZenTao Product Bugs"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract product ID from URI manually
+			uri := request.Params.URI
+			// For URI like zentao://products/123/bugs, extract 123
+			parts := strings.Split(strings.TrimPrefix(uri, "zentao://"), "/")
+			if len(parts) < 3 || parts[0] != "products" || parts[2] != "bugs" {
+				return nil, fmt.Errorf("invalid product bugs URI format: %s", uri)
+			}
+			id := parts[1]
+
+			resp, err := client.Get(fmt.Sprintf("/products/%s/bugs", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get product bugs: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
 	)
 
-	s.AddResource(bugDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "bugs")
+	// Register bug detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://bug/{id}", "ZenTao Bug Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "bug")
 
-		resp, err := client.Get(fmt.Sprintf("/bugs/%s", id))
-		if err != nil {
-			return nil, fmt.Errorf("failed to get bug details: %w", err)
-		}
+			if id == "" {
+				return nil, fmt.Errorf("bug ID not found in URI: %s", uri)
+			}
 
-		return []mcp.ResourceContents{
-			mcp.TextResourceContents{
-				URI:      request.Params.URI,
-				MIMEType: "application/json",
-				Text:     string(resp),
-			},
-		}, nil
-	})
+			resp, err := client.Get(fmt.Sprintf("/bugs/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get bug details: %w", err)
+			}
+
+			// Log the response for debugging
+			logger.Debug("resources", "Bug details response", map[string]interface{}{
+				"uri":      uri,
+				"id":       id,
+				"response": string(resp),
+			})
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
+	)
 }
 
 func RegisterUserResources(s *server.MCPServer, client *client.ZenTaoClient) {
-	userDetailResource := mcp.NewResource(
-		"zentao://users/{id}",
-		"ZenTao User Details",
-		mcp.WithResourceDescription("Details of a specific user by ID (use ID in URI)"),
+	usersListResource := mcp.NewResource(
+		"zentao://users",
+		"ZenTao Users List",
+		mcp.WithResourceDescription("List of all users in ZenTao"),
 		mcp.WithMIMEType("application/json"),
 	)
 
-	s.AddResource(userDetailResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		id := extractIDFromURI(request.Params.URI, "users")
-
-		resp, err := client.Get(fmt.Sprintf("/users/%s", id))
+	s.AddResource(usersListResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+		resp, err := client.Get("/users")
 		if err != nil {
-			return nil, fmt.Errorf("failed to get user details: %w", err)
+			return nil, fmt.Errorf("failed to get users: %w", err)
 		}
 
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
-				URI:      request.Params.URI,
+				URI:      "zentao://users",
 				MIMEType: "application/json",
 				Text:     string(resp),
 			},
 		}, nil
 	})
+
+	// Register user detail resource template
+	s.AddResourceTemplate(
+		mcp.NewResourceTemplate("zentao://user/{id}", "ZenTao User Details"),
+		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+			// Extract ID from URI manually
+			uri := request.Params.URI
+			id := extractIDFromURI(uri, "user")
+
+			if id == "" {
+				return nil, fmt.Errorf("user ID not found in URI: %s", uri)
+			}
+
+			resp, err := client.Get(fmt.Sprintf("/users/%s", id))
+			if err != nil {
+				return nil, fmt.Errorf("failed to get user details: %w", err)
+			}
+
+			return []mcp.ResourceContents{
+				mcp.TextResourceContents{
+					URI:      request.Params.URI,
+					MIMEType: "application/json",
+					Text:     string(resp),
+				},
+			}, nil
+		},
+	)
 
 	myProfileResource := mcp.NewResource(
 		"zentao://user",

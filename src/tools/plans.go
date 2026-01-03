@@ -214,9 +214,9 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 	linkBugsToPlanTool := mcp.NewTool("link_bugs_to_plan",
 		mcp.WithDescription("Link bugs to a product plan in ZenTao"),
-		mcp.WithNumber("product",
+		mcp.WithNumber("id",
 			mcp.Required(),
-			mcp.Description("Product ID"),
+			mcp.Description("Plan ID"),
 		),
 		mcp.WithArray("bugs",
 			mcp.Required(),
@@ -227,13 +227,13 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 
 	s.AddTool(linkBugsToPlanTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		args := request.GetArguments()
-		productID := int(args["product"].(float64))
+		id := int(args["id"].(float64))
 
 		body := map[string]interface{}{
 			"bugs": args["bugs"],
 		}
 
-		resp, err := client.Post(fmt.Sprintf("/products/%d/linkBugs", productID), body)
+		resp, err := client.Post(fmt.Sprintf("/productplans/%d/linkbugs", id), body)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to link bugs: %v", err)), nil
 		}
@@ -265,6 +265,96 @@ func RegisterPlanTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		resp, err := client.Post(fmt.Sprintf("/productplans/%d/unlinkbugs", id), body)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to unlink bugs: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get plans list tool
+	getPlansTool := mcp.NewTool("get_plans",
+		mcp.WithDescription("Get list of product plans in ZenTao"),
+		mcp.WithNumber("product",
+			mcp.Description("Filter by product ID"),
+		),
+		mcp.WithString("status",
+			mcp.Description("Filter by plan status"),
+			mcp.Enum("wait", "doing", "done", "closed"),
+		),
+		mcp.WithString("begin",
+			mcp.Description("Filter by begin date (YYYY-MM-DD)"),
+		),
+		mcp.WithString("end",
+			mcp.Description("Filter by end date (YYYY-MM-DD)"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of plans to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getPlansTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if product, ok := args["product"].(float64); ok && product > 0 {
+			params["product"] = fmt.Sprintf("%.0f", product)
+		}
+		if status, ok := args["status"].(string); ok && status != "" {
+			params["status"] = status
+		}
+		if begin, ok := args["begin"].(string); ok && begin != "" {
+			params["begin"] = begin
+		}
+		if end, ok := args["end"].(string); ok && end != "" {
+			params["end"] = end
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/productplans"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get plans: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get plan details tool
+	getPlanTool := mcp.NewTool("get_plan",
+		mcp.WithDescription("Get details of a specific product plan by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Plan ID"),
+		),
+	)
+
+	s.AddTool(getPlanTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/productplan/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get plan: %v", err)), nil
 		}
 
 		return mcp.NewToolResultText(string(resp)), nil

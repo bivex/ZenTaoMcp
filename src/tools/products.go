@@ -21,33 +21,6 @@ import (
 	"github.com/zentao/mcp-server/client"
 )
 
-func RegisterAuthTools(s *server.MCPServer, client *client.ZenTaoClient) {
-	loginTool := mcp.NewTool("zentao_login",
-		mcp.WithDescription("Login to ZenTao and get authentication token"),
-		mcp.WithString("account",
-			mcp.Required(),
-			mcp.Description("ZenTao account username"),
-		),
-		mcp.WithString("password",
-			mcp.Required(),
-			mcp.Description("ZenTao account password"),
-		),
-	)
-
-	s.AddTool(loginTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		args := request.GetArguments()
-		account := args["account"].(string)
-		password := args["password"].(string)
-
-		token, err := client.GetToken(account, password)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Login failed: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(fmt.Sprintf("Successfully logged in. Token: %s", token)), nil
-	})
-}
-
 func RegisterProductTools(s *server.MCPServer, client *client.ZenTaoClient) {
 	createProductTool := mcp.NewTool("create_product",
 		mcp.WithDescription("Create a new product in ZenTao"),
@@ -210,6 +183,90 @@ func RegisterProductTools(s *server.MCPServer, client *client.ZenTaoClient) {
 		resp, err := client.Delete(fmt.Sprintf("/product/%d", id))
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to delete product: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get products list tool
+	getProductsTool := mcp.NewTool("get_products",
+		mcp.WithDescription("Get list of all products in ZenTao"),
+		mcp.WithString("status",
+			mcp.Description("Filter by product status (normal|closed)"),
+			mcp.Enum("normal", "closed"),
+		),
+		mcp.WithNumber("program",
+			mcp.Description("Filter by program ID"),
+		),
+		mcp.WithNumber("line",
+			mcp.Description("Filter by product line"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of products to return (default: 100)"),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Offset for pagination (default: 0)"),
+		),
+	)
+
+	s.AddTool(getProductsTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+
+		params := make(map[string]string)
+
+		// Add optional filters
+		if status, ok := args["status"].(string); ok && status != "" {
+			params["status"] = status
+		}
+		if program, ok := args["program"].(float64); ok && program > 0 {
+			params["program"] = fmt.Sprintf("%.0f", program)
+		}
+		if line, ok := args["line"].(float64); ok && line > 0 {
+			params["line"] = fmt.Sprintf("%.0f", line)
+		}
+		if limit, ok := args["limit"].(float64); ok && limit > 0 {
+			params["limit"] = fmt.Sprintf("%.0f", limit)
+		}
+		if offset, ok := args["offset"].(float64); ok && offset >= 0 {
+			params["offset"] = fmt.Sprintf("%.0f", offset)
+		}
+
+		path := "/products"
+		if len(params) > 0 {
+			query := ""
+			for k, v := range params {
+				if query != "" {
+					query += "&"
+				}
+				query += fmt.Sprintf("%s=%s", k, v)
+			}
+			path += "?" + query
+		}
+
+		resp, err := client.Get(path)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get products: %v", err)), nil
+		}
+
+		return mcp.NewToolResultText(string(resp)), nil
+	})
+
+	// Get product details tool
+	getProductTool := mcp.NewTool("get_product",
+		mcp.WithDescription("Get details of a specific product by ID"),
+		mcp.WithNumber("id",
+			mcp.Required(),
+			mcp.Description("Product ID"),
+		),
+	)
+
+	s.AddTool(getProductTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.GetArguments()
+		id := int(args["id"].(float64))
+
+		resp, err := client.Get(fmt.Sprintf("/product/%d", id))
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get product: %v", err)), nil
 		}
 
 		return mcp.NewToolResultText(string(resp)), nil
