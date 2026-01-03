@@ -106,6 +106,7 @@ func TestBugToolParameterValidation(t *testing.T) {
 
 	// Test valid enum values
 	validTypes := []string{"codeerror", "config", "install", "security", "performance", "standard", "automation", "designdefect", "others"}
+	bugType, _ := createArgs["type"].(string)
 	found := false
 	for _, validType := range validTypes {
 		if bugType == validType {
