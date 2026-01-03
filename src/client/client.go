@@ -29,6 +29,14 @@ import (
 	"github.com/zentao/mcp-server/logger"
 )
 
+type AuthMethod int
+
+const (
+	AuthNone AuthMethod = iota
+	AuthApp
+	AuthSession
+)
+
 type ZenTaoClient struct {
 	BaseURL       string
 	Code          string
@@ -38,10 +46,16 @@ type ZenTaoClient struct {
 	lastTime      int64
 	timeMutex     sync.Mutex
 
-	// Token caching for reuse
+	// Token caching for app-based auth
 	cachedToken     string
 	cachedTimestamp int64
 	tokenMutex      sync.Mutex
+
+	// Session-based authentication
+	authMethod    AuthMethod
+	sessionName   string
+	sessionID     string
+	sessionMutex  sync.Mutex
 }
 
 func NewZenTaoClient(baseURL string) *ZenTaoClient {
@@ -70,10 +84,24 @@ func NewZenTaoClientWithApp(baseURL, code, key string) *ZenTaoClient {
 	})
 
 	return &ZenTaoClient{
-		BaseURL: baseURL,
-		Code:    code,
-		Key:     key,
-		Client:  &http.Client{},
+		BaseURL:    baseURL,
+		Code:       code,
+		Key:        key,
+		Client:     &http.Client{},
+		authMethod: AuthApp,
+	}
+}
+
+func NewZenTaoClientWithSession(baseURL string) *ZenTaoClient {
+	logger.Info("client", "Creating new ZenTao client with session authentication", map[string]interface{}{
+		"base_url":   baseURL,
+		"auth_type": "session-based",
+	})
+
+	return &ZenTaoClient{
+		BaseURL:    baseURL,
+		Client:     &http.Client{},
+		authMethod: AuthSession,
 	}
 }
 
@@ -85,6 +113,7 @@ func (c *ZenTaoClient) SetAppCredentials(code, key string) {
 
 	c.Code = code
 	c.Key = key
+	c.authMethod = AuthApp
 }
 
 func (c *ZenTaoClient) generateToken(timestamp int64) string {
@@ -502,21 +531,182 @@ func (c *ZenTaoClient) forceTokenRefresh() {
 	c.cachedTimestamp = 0
 }
 
+// Session-based authentication methods
+
+// GetSessionID retrieves a session from ZenTao
+func (c *ZenTaoClient) GetSessionID() error {
+	c.sessionMutex.Lock()
+	defer c.sessionMutex.Unlock()
+
+	logger.Debug("client", "Getting session ID", map[string]interface{}{
+		"base_url": c.BaseURL,
+	})
+
+	// Make request to get session ID
+	resp, err := c.doRequestSingle("GET", "?m=api&f=getSessionID&t=json", nil, nil)
+	if err != nil {
+		logger.Error("client", "Failed to get session ID", err, nil)
+		return fmt.Errorf("failed to get session ID: %w", err)
+	}
+
+	// Parse response
+	var sessionResp map[string]interface{}
+	if err := json.Unmarshal(resp, &sessionResp); err != nil {
+		logger.Error("client", "Failed to parse session response", err, nil)
+		return fmt.Errorf("failed to parse session response: %w", err)
+	}
+
+	// Extract session data
+	data, ok := sessionResp["data"].(map[string]interface{})
+	if !ok {
+		logger.Error("client", "Invalid session response format", nil, map[string]interface{}{
+			"response": string(resp),
+		})
+		return fmt.Errorf("invalid session response format")
+	}
+
+	sessionName, ok := data["sessionName"].(string)
+	if !ok {
+		return fmt.Errorf("sessionName not found in response")
+	}
+
+	sessionID, ok := data["sessionID"].(string)
+	if !ok {
+		return fmt.Errorf("sessionID not found in response")
+	}
+
+	c.sessionName = sessionName
+	c.sessionID = sessionID
+
+	logger.Info("client", "Session obtained successfully", map[string]interface{}{
+		"session_name": sessionName,
+		"session_id_length": len(sessionID),
+	})
+
+	return nil
+}
+
+// Login performs user authentication using session
+func (c *ZenTaoClient) Login(account, password string) error {
+	c.sessionMutex.Lock()
+	defer c.sessionMutex.Unlock()
+
+	if c.sessionName == "" || c.sessionID == "" {
+		return fmt.Errorf("session not initialized, call GetSessionID first")
+	}
+
+	logger.Info("client", "Performing session login", map[string]interface{}{
+		"account": account,
+		"has_session": c.sessionName != "",
+	})
+
+	// Prepare login data
+	loginData := map[string]interface{}{
+		"account":  account,
+		"password": password,
+	}
+
+	// Make login request with session
+	resp, err := c.doRequestSingle("POST", "?m=user&f=login", loginData, nil)
+	if err != nil {
+		logger.Error("client", "Login request failed", err, map[string]interface{}{
+			"account": account,
+		})
+		return fmt.Errorf("login request failed: %w", err)
+	}
+
+	// Parse login response
+	var loginResp map[string]interface{}
+	if err := json.Unmarshal(resp, &loginResp); err != nil {
+		logger.Error("client", "Failed to parse login response", err, nil)
+		return fmt.Errorf("failed to parse login response: %w", err)
+	}
+
+	// Check login result
+	status, ok := loginResp["status"].(string)
+	if !ok || status != "success" {
+		logger.Error("client", "Login failed", nil, map[string]interface{}{
+			"status": status,
+			"response": string(resp),
+		})
+		return fmt.Errorf("login failed: %v", loginResp)
+	}
+
+	logger.Info("client", "Login successful", map[string]interface{}{
+		"account": account,
+	})
+
+	return nil
+}
+
+// SetSessionCredentials manually sets session data (for testing or pre-configured sessions)
+func (c *ZenTaoClient) SetSessionCredentials(sessionName, sessionID string) {
+	c.sessionMutex.Lock()
+	defer c.sessionMutex.Unlock()
+
+	c.sessionName = sessionName
+	c.sessionID = sessionID
+	c.authMethod = AuthSession
+
+	logger.Debug("client", "Session credentials set manually", map[string]interface{}{
+		"session_name": sessionName,
+		"session_id_length": len(sessionID),
+	})
+}
+
+// IsAuthenticated checks if the client has valid authentication
+func (c *ZenTaoClient) IsAuthenticated() bool {
+	switch c.authMethod {
+	case AuthApp:
+		c.tokenMutex.Lock()
+		hasToken := c.cachedToken != "" && c.cachedTimestamp > 0
+		c.tokenMutex.Unlock()
+		return hasToken
+	case AuthSession:
+		c.sessionMutex.Lock()
+		hasSession := c.sessionName != "" && c.sessionID != ""
+		c.sessionMutex.Unlock()
+		return hasSession
+	default:
+		return false
+	}
+}
+
+// GetAuthMethod returns the current authentication method
+func (c *ZenTaoClient) GetAuthMethod() AuthMethod {
+	return c.authMethod
+}
+
 func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
 	baseURL := c.BaseURL
 	authAdded := false
 
-	// Add authentication if available
-	if c.Code != "" && c.Key != "" {
-		token, timestamp := c.getCachedToken()
+	// Add authentication based on method
+	switch c.authMethod {
+	case AuthApp:
+		// App-based authentication
+		if c.Code != "" && c.Key != "" {
+			token, timestamp := c.getCachedToken()
 
-		if params == nil {
-			params = make(map[string]string)
+			if params == nil {
+				params = make(map[string]string)
+			}
+			params["code"] = c.Code
+			params["time"] = strconv.FormatInt(timestamp, 10)
+			params["token"] = token
+			authAdded = true
 		}
-		params["code"] = c.Code
-		params["time"] = strconv.FormatInt(timestamp, 10)
-		params["token"] = token
-		authAdded = true
+	case AuthSession:
+		// Session-based authentication
+		c.sessionMutex.Lock()
+		if c.sessionName != "" && c.sessionID != "" {
+			if params == nil {
+				params = make(map[string]string)
+			}
+			params[c.sessionName] = c.sessionID
+			authAdded = true
+		}
+		c.sessionMutex.Unlock()
 	}
 
 	finalURL := baseURL + path
@@ -531,6 +721,7 @@ func (c *ZenTaoClient) buildURL(path string, params map[string]string) string {
 	logger.Debug("client", "Built request URL", map[string]interface{}{
 		"base_url": baseURL,
 		"path": path,
+		"auth_method": c.authMethod,
 		"auth_added": authAdded,
 		"param_count": len(params),
 		"final_url_length": len(finalURL),

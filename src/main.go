@@ -41,23 +41,47 @@ func main() {
 		})
 	}
 
+	// Determine authentication method
+	authMethod := os.Getenv("ZENTAO_AUTH_METHOD")
+	if authMethod == "" {
+		authMethod = "app" // Default to app-based auth
+	}
+
 	code := os.Getenv("ZENTAO_APP_CODE")
 	key := os.Getenv("ZENTAO_APP_KEY")
 
 	logger.Info("server", "Configuration loaded", map[string]interface{}{
 		"base_url":        baseURL,
+		"auth_method":     authMethod,
 		"has_app_code":    code != "",
 		"has_app_key":     key != "",
 		"log_level":       os.Getenv("ZENTAO_LOG_LEVEL"),
 		"log_json":        os.Getenv("ZENTAO_LOG_JSON"),
 	})
 
-	// Initialize ZenTao client
+	// Initialize ZenTao client based on auth method
 	logger.Debug("server", "Initializing ZenTao client", map[string]interface{}{
-		"base_url": baseURL,
-		"app_code": code,
-		"app_key":  key != ""})
-	ztClient = client.NewZenTaoClientWithApp(baseURL, code, key)
+		"base_url":    baseURL,
+		"auth_method": authMethod,
+		"app_code":    code,
+		"app_key":     key != "",
+	})
+
+	switch authMethod {
+	case "app":
+		ztClient = client.NewZenTaoClientWithApp(baseURL, code, key)
+	case "session":
+		ztClient = client.NewZenTaoClientWithSession(baseURL)
+		logger.Info("server", "Session-based authentication enabled", map[string]interface{}{
+			"note": "Use zentao_login_session tool for authentication",
+		})
+	default:
+		logger.Warn("server", "Unknown auth method, defaulting to app-based", map[string]interface{}{
+			"provided_method": authMethod,
+			"default_method":  "app",
+		})
+		ztClient = client.NewZenTaoClientWithApp(baseURL, code, key)
+	}
 
 	// Initialize MCP server
 	logger.Info("server", "Initializing MCP server", map[string]interface{}{

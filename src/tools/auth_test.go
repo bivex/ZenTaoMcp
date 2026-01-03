@@ -37,6 +37,24 @@ func (m *mockZenTaoClient) Delete(path string) ([]byte, error) {
 	return []byte(`{"status": "success"}`), nil
 }
 
+func (m *mockZenTaoClient) GetAuthMethod() int {
+	return 1 // AuthApp by default for testing
+}
+
+func (m *mockZenTaoClient) IsAuthenticated() bool {
+	return true
+}
+
+func (m *mockZenTaoClient) GetSessionID() error {
+	return nil
+}
+
+func (m *mockZenTaoClient) Login(account, password string) error {
+	return nil
+}
+
+func (m *mockZenTaoClient) SetSessionCredentials(sessionName, sessionID string) {}
+
 func TestRegisterAuthTools(t *testing.T) {
 	// Test that registration doesn't panic
 	defer func() {

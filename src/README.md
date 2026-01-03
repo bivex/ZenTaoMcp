@@ -168,6 +168,22 @@ Set environment variables:
 
 ```bash
 export ZENTAO_BASE_URL="http://your-zentao-instance:8080"
+export ZENTAO_AUTH_METHOD="app"  # or "session"
+```
+
+### Authentication Methods
+
+#### App-Based Authentication (Default)
+```bash
+export ZENTAO_AUTH_METHOD="app"
+export ZENTAO_APP_CODE="your-app-code"
+export ZENTAO_APP_KEY="your-app-key"
+```
+
+#### Session-Based Authentication
+```bash
+export ZENTAO_AUTH_METHOD="session"
+# No additional credentials needed - uses username/password login
 ```
 
 ## Usage
@@ -183,7 +199,8 @@ The server will communicate via stdio, following the MCP protocol.
 ## Tools Available
 
 ### Authentication
-- `zentao_login` - Authenticate with ZenTao
+- `zentao_login` - Authenticate with ZenTao using app credentials (code + key)
+- `zentao_login_session` - Authenticate with ZenTao using username/password (session-based)
 
 ### Products
 - `create_product` - Create a new product
@@ -270,10 +287,21 @@ The server exposes the following resources for data access:
 
 ## Example Usage
 
-### Login
+### App-Based Login
 ```json
 {
   "tool": "zentao_login",
+  "arguments": {
+    "code": "your-app-code",
+    "key": "your-app-key"
+  }
+}
+```
+
+### Session-Based Login
+```json
+{
+  "tool": "zentao_login_session",
   "arguments": {
     "account": "admin",
     "password": "your-password"

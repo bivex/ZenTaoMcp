@@ -427,6 +427,50 @@ func BenchmarkTokenCaching(b *testing.B) {
 	}
 }
 
+func TestNewZenTaoClientWithSession(t *testing.T) {
+	client := NewZenTaoClientWithSession("http://test.com")
+
+	if client.BaseURL != "http://test.com" {
+		t.Errorf("Expected BaseURL to be 'http://test.com', got '%s'", client.BaseURL)
+	}
+
+	if client.authMethod != AuthSession {
+		t.Errorf("Expected authMethod to be AuthSession, got %v", client.authMethod)
+	}
+
+	if client.Code != "" {
+		t.Errorf("Expected Code to be empty, got '%s'", client.Code)
+	}
+
+	if client.Key != "" {
+		t.Errorf("Expected Key to be empty, got '%s'", client.Key)
+	}
+
+	if client.Client == nil {
+		t.Error("Expected HTTP client to be initialized")
+	}
+}
+
+func TestSessionAuthentication(t *testing.T) {
+	client := NewZenTaoClientWithSession("http://test.com")
+
+	// Initially should not be authenticated
+	if client.IsAuthenticated() {
+		t.Error("Expected client to not be authenticated initially")
+	}
+
+	// Set session credentials
+	client.SetSessionCredentials("zentaosid", "test_session_123")
+
+	if !client.IsAuthenticated() {
+		t.Error("Expected client to be authenticated after setting session")
+	}
+
+	if client.GetAuthMethod() != AuthSession {
+		t.Error("Expected auth method to be AuthSession")
+	}
+}
+
 func BenchmarkTimestampGeneration(b *testing.B) {
 	client := &ZenTaoClient{}
 
