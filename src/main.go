@@ -73,6 +73,8 @@ func registerTools(s *server.MCPServer) {
 	tools.RegisterUserTools(s, ztClient)
 	tools.RegisterFeedbackTools(s, ztClient)
 	tools.RegisterTicketTools(s, ztClient)
+	tools.RegisterProgramTools(s, ztClient)
+	tools.RegisterTestTaskTools(s, ztClient)
 }
 
 func registerResources(s *server.MCPServer) {
