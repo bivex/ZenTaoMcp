@@ -17,3 +17,5 @@
 src/mcp-server
 
 opencode.json
+
+gen_token.py
