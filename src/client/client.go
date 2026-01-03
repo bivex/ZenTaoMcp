@@ -29,6 +29,12 @@ import (
 	"github.com/zentao/mcp-server/logger"
 )
 
+const (
+	// tokenCacheDuration is how long to cache tokens before considering them stale
+	// ZenTao tokens expire after 30 seconds, so we cache for 15 seconds (50% of lifetime)
+	tokenCacheDuration = 15
+)
+
 type AuthMethod int
 
 const (
@@ -483,21 +489,20 @@ func (c *ZenTaoClient) getCachedToken() (string, int64) {
 	defer c.tokenMutex.Unlock()
 
 	currentTime := time.Now().Unix()
-	tokenLifetime := int64(15) // Conservative 15-second lifetime
 
 	// Check if we have a valid cached token
 	if c.cachedToken != "" && c.cachedTimestamp > 0 {
 		timeDiff := currentTime - c.cachedTimestamp
-		if timeDiff < tokenLifetime {
+		if timeDiff < tokenCacheDuration {
 			logger.Debug("client", "Using cached token", map[string]interface{}{
 				"token_age_seconds": timeDiff,
-				"remaining_seconds": tokenLifetime - timeDiff,
+				"remaining_seconds": tokenCacheDuration - timeDiff,
 			})
 			return c.cachedToken, c.cachedTimestamp
 		} else {
 			logger.Debug("client", "Cached token expired", map[string]interface{}{
 				"token_age_seconds": timeDiff,
-				"token_lifetime": tokenLifetime,
+				"cache_duration_seconds": tokenCacheDuration,
 			})
 		}
 	}
@@ -523,12 +528,40 @@ func (c *ZenTaoClient) forceTokenRefresh() {
 	c.tokenMutex.Lock()
 	defer c.tokenMutex.Unlock()
 
-	logger.Debug("client", "Forcing token refresh", map[string]interface{}{
-		"previous_token_age": time.Now().Unix() - c.cachedTimestamp,
+	tokenAge := time.Now().Unix() - c.cachedTimestamp
+	logger.Info("client", "Forcing token refresh due to expiration", map[string]interface{}{
+		"token_age_seconds": tokenAge,
+		"cache_duration_seconds": tokenCacheDuration,
+		"reason": "Token expired during API call",
+		"zenTao_token_expiry": 30, // ZenTao tokens expire after 30 seconds
 	})
 
 	c.cachedToken = ""
 	c.cachedTimestamp = 0
+}
+
+// isTokenCloseToExpiry checks if the cached token is close to expiring
+func (c *ZenTaoClient) isTokenCloseToExpiry() bool {
+	c.tokenMutex.Lock()
+	defer c.tokenMutex.Unlock()
+
+	if c.cachedToken == "" {
+		return true
+	}
+
+	tokenAge := time.Now().Unix() - c.cachedTimestamp
+	// Consider token close to expiry if it's older than 80% of cache duration
+	isCloseToExpiry := tokenAge > int64(float64(tokenCacheDuration)*0.8)
+
+	if isCloseToExpiry {
+		logger.Debug("client", "Token approaching expiry, will refresh proactively", map[string]interface{}{
+			"token_age_seconds": tokenAge,
+			"cache_duration_seconds": tokenCacheDuration,
+			"threshold_percentage": 80,
+		})
+	}
+
+	return isCloseToExpiry
 }
 
 // Session-based authentication methods
@@ -740,7 +773,7 @@ func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{},
 
 	for attempt := 0; attempt <= maxRetries; attempt++ {
 		if attempt > 0 {
-			logger.Debug("client", "Retrying request due to token expiration", map[string]interface{}{
+			logger.Info("client", "Retrying request after token refresh", map[string]interface{}{
 				"attempt": attempt,
 				"max_retries": maxRetries,
 				"method": method,
@@ -750,6 +783,13 @@ func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{},
 			c.forceTokenRefresh()
 			// Small delay before retry
 			time.Sleep(100 * time.Millisecond)
+		} else if c.isTokenCloseToExpiry() {
+			// Proactively refresh token if it's close to expiry (before first attempt)
+			logger.Debug("client", "Proactively refreshing token before request", map[string]interface{}{
+				"method": method,
+				"path": path,
+			})
+			c.forceTokenRefresh()
 		}
 
 		resp, err := c.doRequestSingle(method, path, body, headers)

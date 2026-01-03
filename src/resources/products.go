@@ -55,9 +55,7 @@ func RegisterProductResources(s *server.MCPServer, client *client.ZenTaoClient) 
 		}, nil
 	})
 
-	// Note: MCP library may not support URI templates like {id}
-	// For now, we'll implement individual resources using query parameters
-	// Register product detail resource template
+	// Register product detail resource template (URI templates are working)
 	s.AddResourceTemplate(
 		mcp.NewResourceTemplate("zentao://product/{id}", "ZenTao Product Details"),
 		func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {

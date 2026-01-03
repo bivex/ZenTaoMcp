@@ -198,8 +198,16 @@ func registerResources(s *server.MCPServer) {
 	logger.Debug("server", "Registering plan resources", nil)
 	resources.RegisterPlanResources(s, ztClient)
 
+	logger.Debug("server", "Registering build resources", nil)
+	resources.RegisterBuildResources(s, ztClient)
+
+	logger.Debug("server", "Registering plan resources", nil)
+	resources.RegisterPlanResources(s, ztClient)
+
 	logger.Info("server", "All resource registrations completed", map[string]interface{}{
 		"total_resources": 10,
+		"templates_registered": 19,
+		"note": "List resources + resource templates for individual/scoped access",
 	})
 }
 
