@@ -1,40 +1,133 @@
-# ZenTao MCP Server
+# ZenTao MCP Server - Model Context Protocol Integration for ZenTao Project Management
 
-<img width="727" height="575" alt="image" src="https://github.com/user-attachments/assets/7c26eb36-550b-47d6-b007-2d2cb2c3aa0a" />
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://golang.org/)
+[![ZenTao](https://img.shields.io/badge/ZenTao-21.7.7-blue)](https://www.zentao.net/)
+[![MCP](https://img.shields.io/badge/MCP-Protocol-green)](https://modelcontextprotocol.io/)
 
-A comprehensive Model Context Protocol (MCP) server for integrating with ZenTao project management system. This server provides **304 tools**, **42 resources**, and **2 prompts** covering all major ZenTao modules.
+<img width="727" height="575" alt="ZenTao MCP Server Architecture" src="https://github.com/user-attachments/assets/7c26eb36-550b-47d6-b007-2d2cb2c3aa0a" />
 
-## Features
+## Overview
 
-- **304 MCP Tools** - Complete CRUD operations for all ZenTao entities
-- **42 MCP Resources** - Data access via URI-based resources
-- **96 Resource Templates** - Dynamic resource access with parameters
-- **2 MCP Prompts** - Guided workflows for common operations
-- **Full API Coverage** - Supports products, projects, stories, tasks, bugs, users, AI features, and more
-- **Authentication Support** - App-based and session-based authentication
-- **Comprehensive Logging** - Detailed logging for debugging and monitoring
+**ZenTao MCP Server** is a comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides seamless integration between AI assistants and the [ZenTao](https://www.zentao.net/) project management system. Built with Go, this server exposes **304 tools**, **42 resources**, and **2 prompts** covering all major ZenTao modules including products, projects, user stories, tasks, bugs, test cases, releases, builds, and more.
+
+### What is ZenTao?
+
+[ZenTao](https://www.zentao.net/) is an open-source project management and bug tracking system designed for agile development teams. It supports Scrum, Kanban, and waterfall methodologies, providing comprehensive features for product management, project planning, requirement tracking, bug management, and test case management.
+
+### What is MCP?
+
+The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) is an open protocol that enables AI assistants to securely access external data sources and tools. MCP servers act as bridges between AI applications and various services, allowing LLMs to interact with APIs, databases, and other systems in a standardized way.
+
+## Key Features
+
+- **🚀 304 MCP Tools** - Complete CRUD operations for all ZenTao entities (products, projects, stories, tasks, bugs, users, AI features, and more)
+- **📦 42 MCP Resources** - URI-based data access with RESTful resource patterns
+- **🔧 96 Resource Templates** - Dynamic resource access with parameterized URIs
+- **💡 2 MCP Prompts** - Guided workflows for common operations (product creation, story creation)
+- **🔐 Authentication Support** - App-based and session-based authentication methods
+- **📊 Full API Coverage** - Supports all ZenTao modules including:
+  - Product Management
+  - Project Management & Executions
+  - User Stories & Requirements
+  - Task Management
+  - Bug Tracking
+  - Test Case Management
+  - Build & Release Management
+  - Kanban Boards
+  - AI Integration (ZAI)
+  - Node Management (Zanode)
+  - And much more
+- **📝 Comprehensive Logging** - Detailed logging for debugging and monitoring
+- **⚡ High Performance** - Built with Go for optimal performance and low resource usage
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Tools Reference](#tools-304-total)
+- [Resources Reference](#resources-42-total--96-templates)
+- [Prompts](#prompts-2-total)
+- [Usage Examples](#usage-examples)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
 ## Installation
 
+### Prerequisites
+
+- [Go](https://golang.org/) 1.23 or higher
+- Access to a ZenTao instance (version 21.7.7 or compatible)
+- ZenTao API credentials (app code/key or session credentials)
+
+### Build from Source
+
 ```bash
+# Clone the repository
+git clone https://github.com/bivex/ZenTaoMcp.git
+cd ZenTaoMcp
+
+# Build the server
 cd src
 go mod download
-go build
+go build -o mcp-server
+
+# Run the server
 ./mcp-server
 ```
 
+## Quick Start
+
+1. **Set Environment Variables:**
+   ```bash
+   export ZENTAO_BASE_URL="https://your-zentao-instance.com"
+   export ZENTAO_AUTH_METHOD="app"
+   export ZENTAO_APP_CODE="your-app-code"
+   export ZENTAO_APP_KEY="your-app-key"
+   ```
+
+2. **Start the MCP Server:**
+   ```bash
+   ./mcp-server
+   ```
+
+3. **Connect from Your MCP Client:**
+   The server communicates via stdio using the MCP protocol. Configure your MCP client to use this server.
+
 ## Configuration
 
-Set the following environment variables:
+### Environment Variables
 
-- `ZENTAO_BASE_URL` - ZenTao API base URL (default: `http://localhost:8080`)
-- `ZENTAO_AUTH_METHOD` - Authentication method: `app` or `session` (default: `app`)
-- `ZENTAO_APP_CODE` - App code for app-based authentication
-- `ZENTAO_APP_KEY` - App key for app-based authentication
-- `ZENTAO_LOG_LEVEL` - Log level (optional)
-- `ZENTAO_LOG_JSON` - Enable JSON logging (optional)
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `ZENTAO_BASE_URL` | ZenTao API base URL | `http://localhost:8080` | No |
+| `ZENTAO_AUTH_METHOD` | Authentication method: `app` or `session` | `app` | No |
+| `ZENTAO_APP_CODE` | App code for app-based authentication | - | Yes (if using app auth) |
+| `ZENTAO_APP_KEY` | App key for app-based authentication | - | Yes (if using app auth) |
+| `ZENTAO_LOG_LEVEL` | Log level (debug, info, warn, error) | `info` | No |
+| `ZENTAO_LOG_JSON` | Enable JSON logging format | `false` | No |
+
+### Authentication Methods
+
+#### App-Based Authentication (Recommended)
+```bash
+export ZENTAO_AUTH_METHOD="app"
+export ZENTAO_APP_CODE="your-app-code"
+export ZENTAO_APP_KEY="your-app-key"
+```
+
+#### Session-Based Authentication
+```bash
+export ZENTAO_AUTH_METHOD="session"
+# Then use zentao_login_session tool with account/password
+```
 
 ## Tools (304 Total)
+
+The server provides comprehensive tools for managing all aspects of ZenTao. Here's a categorized overview:
 
 ### Authentication (2 tools)
 - `zentao_login_app` - Login with app credentials
@@ -326,6 +419,8 @@ Set the following environment variables:
 
 ## Resources (42 Total + 96 Templates)
 
+Resources provide URI-based access to ZenTao data. All resources follow the pattern `zentao://{entity}/{id}` or `zentao://{entity}/{id}/{subentity}`.
+
 ### Products
 - `zentao://products` - List of all products
 - `zentao://products/{id}` - Individual product details
@@ -506,6 +601,8 @@ Set the following environment variables:
 
 ## Prompts (2 Total)
 
+MCP Prompts provide guided workflows for common operations:
+
 1. **`create_product`** - Guided workflow for creating a new product
    - Required arguments: `name`, `code`
    - Optional arguments: `program`, `line`, `PO`, `QD`, `RD`, `type`, `desc`, `acl`
@@ -518,12 +615,26 @@ Set the following environment variables:
 
 ### Using Tools
 
+Create a new product:
 ```json
 {
   "name": "create_product",
   "arguments": {
     "name": "My Product",
     "code": "MP001"
+  }
+}
+```
+
+Create a user story:
+```json
+{
+  "name": "create_story",
+  "arguments": {
+    "title": "User login functionality",
+    "product": 1,
+    "pri": 1,
+    "spec": "Users should be able to login with email and password"
   }
 }
 ```
@@ -540,6 +651,11 @@ Access user's todos:
 zentao://my/todos
 ```
 
+Get project kanban board:
+```
+zentao://projects/456/kanban
+```
+
 ### Using Prompts
 
 Get guided workflow for creating a product:
@@ -547,12 +663,37 @@ Get guided workflow for creating a product:
 prompt://create_product?name=MyProduct&code=MP001
 ```
 
+## API Documentation
+
+Complete ZenTao REST API documentation is available in the `api_doc.txt` file, which includes:
+- 82+ API endpoints
+- Request/response schemas
+- Required vs optional parameters
+- Example requests
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
 ## License
 
-MIT License. Commercial licensing available upon request.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+Commercial licensing available upon request.
 
 ## Contact
 
-- Author: Bivex
-- Contact: support@b-b.top
-- GitHub: https://github.com/bivex
+- **Author:** Bivex
+- **Email:** support@b-b.top
+- **Website:** https://contact.b-b.top
+- **GitHub:** https://github.com/bivex
+
+---
+
+**Keywords:** ZenTao, MCP, Model Context Protocol, Project Management, Bug Tracking, Agile, Scrum, Kanban, Go, REST API, AI Integration, LLM, Claude, GPT, ZenTao API, Project Management System, Agile Development, Software Development, DevOps, CI/CD, Test Management, Requirement Management
