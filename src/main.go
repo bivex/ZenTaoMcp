@@ -80,10 +80,12 @@ func registerTools(s *server.MCPServer) {
 func registerResources(s *server.MCPServer) {
 	resources.RegisterProductResources(s, ztClient)
 	resources.RegisterProjectResources(s, ztClient)
+	resources.RegisterProgramResources(s, ztClient)
 	resources.RegisterStoryResources(s, ztClient)
 	resources.RegisterTaskResources(s, ztClient)
 	resources.RegisterBugResources(s, ztClient)
 	resources.RegisterUserResources(s, ztClient)
+	resources.RegisterTestTaskResources(s, ztClient)
 }
 
 func registerPrompts(s *server.MCPServer) {
