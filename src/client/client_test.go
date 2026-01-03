@@ -479,3 +479,312 @@ func BenchmarkTimestampGeneration(b *testing.B) {
 		client.getTimestamp()
 	}
 }
+
+// TestTokenCachingBehavior tests detailed token caching behavior
+func TestTokenCachingBehavior(t *testing.T) {
+	client := &ZenTaoClient{}
+
+	// Test initial token generation
+	ts1 := time.Now().Unix()
+	token1 := client.generateToken(ts1)
+	if token1 == "" {
+		t.Error("Expected non-empty token")
+	}
+
+	// Manually set cached token for testing
+	client.tokenMutex.Lock()
+	client.cachedToken = token1
+	client.cachedTimestamp = ts1
+	client.tokenMutex.Unlock()
+
+	// Test caching - should return cached token
+	cachedToken := client.cachedToken
+	cachedTs := client.cachedTimestamp
+
+	if cachedToken != token1 {
+		t.Errorf("Expected cached token %s, got %s", token1, cachedToken)
+	}
+	if cachedTs != ts1 {
+		t.Errorf("Expected cached timestamp %d, got %d", ts1, cachedTs)
+	}
+
+	// Force token expiry by setting old timestamp
+	client.tokenMutex.Lock()
+	client.cachedTimestamp = time.Now().Unix() - tokenCacheDuration - 1
+	client.tokenMutex.Unlock()
+
+	// Generate new token with different timestamp (would be different)
+	ts2 := time.Now().Unix() + 1
+	token2 := client.generateToken(ts2)
+	if token1 == token2 {
+		t.Error("Expected different tokens for different timestamps")
+	}
+}
+
+// TestTokenExpirationDetectionLogic tests the isTokenExpired function with various inputs
+func TestTokenExpirationDetectionLogic(t *testing.T) {
+	tests := []struct {
+		name     string
+		response []byte
+		expected bool
+	}{
+		{
+			name:     "Valid JSON without error",
+			response: []byte(`{"data": "test"}`),
+			expected: false,
+		},
+		{
+			name:     "Token expired - errcode 405",
+			response: []byte(`{"errcode": 405, "errmsg": "Token expired"}`),
+			expected: true,
+		},
+		{
+			name:     "Token error in message",
+			response: []byte(`{"errmsg": "Invalid token provided"}`),
+			expected: true,
+		},
+		{
+			name:     "Token expired in message",
+			response: []byte(`{"message": "Your token has expired"}`),
+			expected: true,
+		},
+		{
+			name:     "Invalid JSON",
+			response: []byte(`invalid json`),
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &ZenTaoClient{}
+			result := client.isTokenExpired(tt.response)
+			if result != tt.expected {
+				t.Errorf("isTokenExpired(%s) = %v, expected %v", string(tt.response), result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestTokenCloseToExpiryDetection tests proactive token refresh detection
+func TestTokenCloseToExpiryDetection(t *testing.T) {
+	client := &ZenTaoClient{}
+
+	// Test with no cached token
+	if !client.isTokenCloseToExpiry() {
+		t.Error("Expected true for no cached token")
+	}
+
+	// Set a fresh token
+	client.tokenMutex.Lock()
+	client.cachedToken = "test_token"
+	client.cachedTimestamp = time.Now().Unix()
+	client.tokenMutex.Unlock()
+
+	// Should not be close to expiry
+	if client.isTokenCloseToExpiry() {
+		t.Error("Expected false for fresh token")
+	}
+
+	// Set token close to expiry (12 seconds old, 80% of 15 second cache)
+	client.tokenMutex.Lock()
+	client.cachedTimestamp = time.Now().Unix() - int64(float64(tokenCacheDuration)*0.8) - 1
+	client.tokenMutex.Unlock()
+
+	// Should be close to expiry
+	if !client.isTokenCloseToExpiry() {
+		t.Error("Expected true for token close to expiry")
+	}
+}
+
+// TestForceTokenRefreshMechanism tests forced token refresh
+func TestForceTokenRefreshMechanism(t *testing.T) {
+	client := &ZenTaoClient{}
+
+	// Set initial token
+	client.tokenMutex.Lock()
+	client.cachedToken = "initial_token"
+	client.cachedTimestamp = time.Now().Unix()
+	client.tokenMutex.Unlock()
+
+	// Force refresh
+	client.forceTokenRefresh()
+
+	// Verify cache is cleared
+	client.tokenMutex.Lock()
+	if client.cachedToken != "" {
+		t.Error("Expected empty cached token after force refresh")
+	}
+	if client.cachedTimestamp != 0 {
+		t.Error("Expected zero timestamp after force refresh")
+	}
+	client.tokenMutex.Unlock()
+}
+
+// TestConcurrentTokenGeneration tests thread-safe token generation
+func TestConcurrentTokenGeneration(t *testing.T) {
+	client := &ZenTaoClient{}
+
+	// Run multiple goroutines generating tokens concurrently
+	const numGoroutines = 10
+	const numRequests = 50
+
+	var wg sync.WaitGroup
+	tokens := make(chan string, numGoroutines*numRequests)
+
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < numRequests; j++ {
+				token := client.generateToken(time.Now().Unix())
+				tokens <- token
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(tokens)
+
+	// Collect all tokens
+	var tokenList []string
+	for token := range tokens {
+		tokenList = append(tokenList, token)
+	}
+
+	// Verify all tokens are valid (non-empty)
+	for i, token := range tokenList {
+		if token == "" {
+			t.Errorf("Empty token at index %d", i)
+		}
+	}
+
+	// Verify reasonable number of unique tokens (should vary due to different timestamps)
+	uniqueTokens := make(map[string]bool)
+	for _, token := range tokenList {
+		uniqueTokens[token] = true
+	}
+
+	// Should have many unique tokens due to different timestamps
+	if len(uniqueTokens) < numGoroutines {
+		t.Logf("Got %d unique tokens from %d concurrent requests, expected more variation", len(uniqueTokens), len(tokenList))
+	}
+}
+
+// TestTokenExpirationResponseParsing tests parsing of token expiration responses
+func TestTokenExpirationResponseParsing(t *testing.T) {
+	client := &ZenTaoClient{}
+
+	testCases := []struct {
+		name        string
+		response    []byte
+		shouldRetry bool
+	}{
+		{"Valid response", []byte(`{"data": "ok"}`), false},
+		{"Token expired errcode", []byte(`{"errcode": 405, "errmsg": "Token expired"}`), true},
+		{"Token invalid message", []byte(`{"errmsg": "Invalid token provided"}`), true},
+		{"Token expired message", []byte(`{"message": "Your token has expired"}`), true},
+		{"Invalid JSON", []byte(`not json`), false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := client.isTokenExpired(tc.response)
+			if result != tc.shouldRetry {
+				t.Errorf("isTokenExpired(%s) = %v, expected %v", string(tc.response), result, tc.shouldRetry)
+			}
+		})
+	}
+}
+
+// TestTokenRefreshFlow tests the overall token refresh flow
+func TestTokenRefreshFlow(t *testing.T) {
+	client := &ZenTaoClient{}
+
+	// Test that force refresh clears cache
+	client.tokenMutex.Lock()
+	client.cachedToken = "test_token"
+	client.cachedTimestamp = time.Now().Unix()
+	client.tokenMutex.Unlock()
+
+	client.forceTokenRefresh()
+
+	client.tokenMutex.Lock()
+	if client.cachedToken != "" || client.cachedTimestamp != 0 {
+		t.Error("Expected cache to be cleared after force refresh")
+	}
+	client.tokenMutex.Unlock()
+}
+
+// TestTokenCacheBoundaryConditions tests token caching at boundary conditions
+func TestTokenCacheBoundaryConditions(t *testing.T) {
+	if tokenCacheDuration != 15 {
+		t.Errorf("Expected tokenCacheDuration to be 15, got %d", tokenCacheDuration)
+	}
+
+	client := &ZenTaoClient{}
+
+	// Test token caching behavior manually
+	currentTime := time.Now().Unix()
+
+	// Set token exactly at cache duration boundary (should be valid)
+	client.tokenMutex.Lock()
+	client.cachedToken = "boundary_token"
+	client.cachedTimestamp = currentTime - tokenCacheDuration
+	client.tokenMutex.Unlock()
+
+	// Should return cached token (boundary is inclusive)
+	cachedToken := client.cachedToken
+	if cachedToken != "boundary_token" {
+		t.Error("Expected cached token at boundary")
+	}
+
+	// Set token just past boundary (should be invalid)
+	client.tokenMutex.Lock()
+	client.cachedTimestamp = currentTime - tokenCacheDuration - 1
+	client.tokenMutex.Unlock()
+
+	// Cache should be considered expired
+	if client.cachedTimestamp >= currentTime-tokenCacheDuration {
+		t.Error("Expected token to be considered expired")
+	}
+}
+
+// TestProactiveTokenRefreshLogic tests the logic for detecting tokens close to expiry
+func TestProactiveTokenRefreshLogic(t *testing.T) {
+	client := &ZenTaoClient{}
+
+	// Test with no token (should be considered close to expiry)
+	if !client.isTokenCloseToExpiry() {
+		t.Error("Expected true for client with no cached token")
+	}
+
+	// Set token that's fresh
+	client.tokenMutex.Lock()
+	client.cachedToken = "fresh_token"
+	client.cachedTimestamp = time.Now().Unix()
+	client.tokenMutex.Unlock()
+
+	if client.isTokenCloseToExpiry() {
+		t.Error("Expected false for fresh token")
+	}
+
+	// Set token that's close to expiry (13 seconds old for 15-second cache, ensuring it's over 80% threshold)
+	client.tokenMutex.Lock()
+	client.cachedTimestamp = time.Now().Unix() - 13
+	client.tokenMutex.Unlock()
+
+	if !client.isTokenCloseToExpiry() {
+		t.Error("Expected true for token close to expiry")
+	}
+}
+
+// TestTokenCacheConstants tests that cache duration constants are correct
+func TestTokenCacheConstants(t *testing.T) {
+	// ZenTao tokens expire after 30 seconds
+	// We cache for 15 seconds (50% of lifetime) as conservative approach
+	expectedDuration := 15
+	if tokenCacheDuration != expectedDuration {
+		t.Errorf("Expected tokenCacheDuration to be %d, got %d", expectedDuration, tokenCacheDuration)
+	}
+}

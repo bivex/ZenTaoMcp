@@ -546,6 +546,7 @@ func (c *ZenTaoClient) isTokenCloseToExpiry() bool {
 	defer c.tokenMutex.Unlock()
 
 	if c.cachedToken == "" {
+		logger.Debug("client", "No cached token found", nil)
 		return true
 	}
 
@@ -554,7 +555,7 @@ func (c *ZenTaoClient) isTokenCloseToExpiry() bool {
 	isCloseToExpiry := tokenAge > int64(float64(tokenCacheDuration)*0.8)
 
 	if isCloseToExpiry {
-		logger.Debug("client", "Token approaching expiry, will refresh proactively", map[string]interface{}{
+		logger.Info("client", "Token approaching expiry, will refresh proactively", map[string]interface{}{
 			"token_age_seconds": tokenAge,
 			"cache_duration_seconds": tokenCacheDuration,
 			"threshold_percentage": 80,
@@ -768,6 +769,21 @@ func (c *ZenTaoClient) DoRequest(method, path string, body interface{}, headers 
 }
 
 func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{}, headers map[string]string, maxRetries int) ([]byte, error) {
+	// Log token cache state at start of request
+	c.tokenMutex.Lock()
+	tokenAge := time.Now().Unix() - c.cachedTimestamp
+	hasToken := c.cachedToken != ""
+	c.tokenMutex.Unlock()
+
+	logger.Debug("client", "Starting request with current token state", map[string]interface{}{
+		"method": method,
+		"path": path,
+		"has_cached_token": hasToken,
+		"token_age_seconds": tokenAge,
+		"cache_duration": tokenCacheDuration,
+		"is_close_to_expiry": c.isTokenCloseToExpiry(),
+	})
+
 	var lastErr error
 	var responseBody []byte
 
@@ -818,9 +834,30 @@ func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{},
 				})
 				return nil, fmt.Errorf("token expired after %d attempts", maxRetries+1)
 			}
+		} else {
+			// Response received but no token expiration detected
+			logger.Debug("client", "Response received, token still valid", map[string]interface{}{
+				"attempt": attempt + 1,
+				"method": method,
+				"path": path,
+				"response_length": len(responseBody),
+				"response_preview": func() string {
+					previewLen := 100
+					if len(responseBody) < previewLen {
+						previewLen = len(responseBody)
+					}
+					return string(responseBody)[:previewLen]
+				}(),
+			})
 		}
 
-		// Success - return the response
+		// Success - log the successful response and return
+		logger.Debug("client", "Request completed successfully", map[string]interface{}{
+			"attempt": attempt + 1,
+			"method": method,
+			"path": path,
+			"response_length": len(responseBody),
+		})
 		return responseBody, nil
 	}
 
@@ -828,25 +865,67 @@ func (c *ZenTaoClient) doRequestWithRetry(method, path string, body interface{},
 }
 
 func (c *ZenTaoClient) isTokenExpired(responseBody []byte) bool {
+	// Log the response for debugging token expiration issues
+	responseStr := string(responseBody)
+	logger.Debug("client", "Checking response for token expiration", map[string]interface{}{
+		"response_length": len(responseStr),
+		"response_preview": func() string {
+			previewLen := 200
+			if len(responseStr) < previewLen {
+				previewLen = len(responseStr)
+			}
+			return responseStr[:previewLen]
+		}(), // First 200 chars
+	})
+
 	// Check for common token expiration indicators
 	var response map[string]interface{}
 	if err := json.Unmarshal(responseBody, &response); err != nil {
+		logger.Debug("client", "Failed to parse response as JSON, not considering token error", map[string]interface{}{
+			"parse_error": err.Error(),
+		})
 		return false // Can't parse, assume not token error
 	}
 
 	// Check for ZenTao-specific token error codes
 	if errcode, ok := response["errcode"].(float64); ok && errcode == 405 {
+		logger.Warn("client", "Token expired - detected via errcode 405", map[string]interface{}{
+			"errcode": errcode,
+			"full_response": responseStr,
+		})
 		return true
 	}
 
-	// Check for error messages containing token-related text
-	if errmsg, ok := response["errmsg"].(string); ok {
-		if strings.Contains(strings.ToLower(errmsg), "token") {
-			return true
+	// Check for error messages containing token-related text (multiple field names)
+	messageFields := []string{"errmsg", "message", "error"}
+	for _, field := range messageFields {
+		if msg, ok := response[field].(string); ok {
+			msgLower := strings.ToLower(msg)
+			if strings.Contains(msgLower, "token") || strings.Contains(msgLower, "expired") {
+				logger.Warn("client", "Token expired - detected via message field", map[string]interface{}{
+					"field": field,
+					"message": msg,
+					"full_response": responseStr,
+				})
+				return true
+			}
 		}
 	}
 
+	logger.Debug("client", "Response does not indicate token expiration", map[string]interface{}{
+		"response_keys": getMapKeys(response),
+	})
+
 	return false
+}
+
+// Helper function to get map keys for logging
+func getMapKeys(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 func (c *ZenTaoClient) doRequestSingle(method, path string, body interface{}, headers map[string]string) ([]byte, error) {
