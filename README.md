@@ -4,6 +4,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://golang.org/)
 [![ZenTao](https://img.shields.io/badge/ZenTao-21.7.7-blue)](https://www.zentao.net/)
 [![MCP](https://img.shields.io/badge/MCP-Protocol-green)](https://modelcontextprotocol.io/)
+[![WIP](https://img.shields.io/badge/WIP-orange)]()
 
 <img width="1005" height="942" alt="image" src="https://github.com/user-attachments/assets/506b136a-2c26-4df3-89d1-b74ccf079656" />
 
